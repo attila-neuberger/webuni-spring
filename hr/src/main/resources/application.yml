@@ -1,0 +1,18 @@
+spring:
+  profiles:
+    active: smart
+
+hr:
+  employeesalary:
+    def:
+      percent: 5
+    smart:
+      limit:
+        top: 10
+        medium: 5
+        bottom: 2.5
+      percent:
+        top: 10
+        medium: 5
+        bottom: 2
+        none: 0
