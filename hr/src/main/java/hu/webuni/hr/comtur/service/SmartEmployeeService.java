@@ -21,14 +21,14 @@ public class SmartEmployeeService implements EmployeeService {
 	public int getPayRaisePercent(Employee employee) {
 		Duration duration = Duration.between(employee.getStartDate(), LocalDateTime.now());
 		long days = duration.toDays();
-		if (days > hrConfigProperties.getEmployeesalary().getSmart().getLimit().getTop() * DAYS_IN_YEAR) {
-			return hrConfigProperties.getEmployeesalary().getSmart().getPercent().getTop();
-		} else if (days > hrConfigProperties.getEmployeesalary().getSmart().getLimit().getMedium() * DAYS_IN_YEAR) {
-			return hrConfigProperties.getEmployeesalary().getSmart().getPercent().getMedium();
-		} else if (days > hrConfigProperties.getEmployeesalary().getSmart().getLimit().getBottom() * DAYS_IN_YEAR) {
-			return hrConfigProperties.getEmployeesalary().getSmart().getPercent().getBottom();
+		if (days > hrConfigProperties.getEmployeesalary().getSmart().getLimit()[0] * DAYS_IN_YEAR) {
+			return hrConfigProperties.getEmployeesalary().getSmart().getPercent()[0];
+		} else if (days > hrConfigProperties.getEmployeesalary().getSmart().getLimit()[1] * DAYS_IN_YEAR) {
+			return hrConfigProperties.getEmployeesalary().getSmart().getPercent()[1];
+		} else if (days > hrConfigProperties.getEmployeesalary().getSmart().getLimit()[2] * DAYS_IN_YEAR) {
+			return hrConfigProperties.getEmployeesalary().getSmart().getPercent()[2];
 		} else {
-			return hrConfigProperties.getEmployeesalary().getSmart().getPercent().getNone();
+			return 0;
 		}
 	}
 }

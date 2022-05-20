@@ -7,12 +7,5 @@ hr:
     def:
       percent: 5
     smart:
-      limit:
-        top: 10
-        medium: 5
-        bottom: 2.5
-      percent:
-        top: 10
-        medium: 5
-        bottom: 2
-        none: 0
+      limit: [10, 5, 2.5]
+      percent: [10, 5, 2]

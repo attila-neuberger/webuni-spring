@@ -51,79 +51,20 @@ public class HrConfigProperties {
 	
 	public static class Smart {
 		
-		private Limit limit = new Limit();
-		private Percent percent = new Percent();
+		private double[] limit;
+		private int[] percent;
 		
-		public Limit getLimit() {
+		public double[] getLimit() {
 			return limit;
 		}
-		public void setLimit(Limit limit) {
+		public void setLimit(double[] limit) {
 			this.limit = limit;
 		}
-		public Percent getPercent() {
+		public int[] getPercent() {
 			return percent;
 		}
-		public void setPercent(Percent percent) {
+		public void setPercent(int[] percent) {
 			this.percent = percent;
-		}
-	}
-	
-	public static class Limit {
-		
-		private double top;
-		private double medium;
-		private double bottom;
-		
-		public double getTop() {
-			return top;
-		}
-		public void setTop(double top) {
-			this.top = top;
-		}
-		public double getMedium() {
-			return medium;
-		}
-		public void setMedium(double medium) {
-			this.medium = medium;
-		}
-		public double getBottom() {
-			return bottom;
-		}
-		public void setBottom(double bottom) {
-			this.bottom = bottom;
-		}
-	}
-	
-	public static class Percent {
-		
-		private int top;
-		private int medium;
-		private int bottom;
-		private int none;
-		
-		public int getTop() {
-			return top;
-		}
-		public void setTop(int top) {
-			this.top = top;
-		}
-		public int getMedium() {
-			return medium;
-		}
-		public void setMedium(int medium) {
-			this.medium = medium;
-		}
-		public int getBottom() {
-			return bottom;
-		}
-		public void setBottom(int bottom) {
-			this.bottom = bottom;
-		}
-		public int getNone() {
-			return none;
-		}
-		public void setNone(int none) {
-			this.none = none;
 		}
 	}
 }
