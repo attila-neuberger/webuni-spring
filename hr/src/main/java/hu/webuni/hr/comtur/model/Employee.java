@@ -10,8 +10,9 @@ public class Employee {
 	private int salary;
 	private LocalDateTime startDate;
 	
+	public Employee() {}
+	
 	public Employee(long id, String name, String position, int salary, LocalDateTime startDate) {
-		super();
 		this.id = id;
 		this.name = name;
 		this.position = position;

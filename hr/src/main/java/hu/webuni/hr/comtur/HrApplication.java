@@ -28,9 +28,12 @@ public class HrApplication implements CommandLineRunner {
 				LocalDateTime.of(2018, 1, 1, 0, 0));
 		Employee employee3 = new Employee(3L, "Name3", "Position3", 1000,
 				LocalDateTime.of(2022, 1, 1, 0, 0));
+		Employee employee4 = new Employee(4L, "Name4", "Position4", 1234,
+				LocalDateTime.of(2015, 1, 1, 0, 0));
 		raiseSalary(employee1);
 		raiseSalary(employee2);
 		raiseSalary(employee3);
+		raiseSalary(employee4);
 	}
 	
 	private void raiseSalary(Employee employee) {

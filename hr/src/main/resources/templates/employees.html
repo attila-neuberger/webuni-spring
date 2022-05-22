@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta charset="utf-8">
+		<title>HR application</title>
+	</head>
+	<body>
+		<h1>Employees</h1>
+		
+		<h3>Table of employees:</h3>
+		<table border="1px" style="border-collapse: collapse;">
+			<tr>
+			    <th width="50px">ID</th>
+			    <th width="150px">Name</th>
+			    <th width="150px">Position</th>
+			    <th width="150px">Salary</th>
+			    <th width="150px">Start date</th>
+  			</tr>
+  			<tr th:each="employee : ${employees}">
+  				<td th:text="${employee.id}">ID</td>
+  				<td th:text="${employee.name}">Name</td>
+  				<td th:text="${employee.position}">Position</td>
+  				<td th:text="${employee.salary}">Salary</td>
+  				<td th:text="${employee.startDate}">Start date</td>
+  			</tr>
+		</table>
+		
+		<h3>Create new employee:</h3>
+		<form th:action="@{/employees}" method="post" th:object="${newEmployee}">
+			<label for="e_id" style="display: inline-block; width: 100px;">ID:</label>
+				<input id="e_id" th:field="*{id}" type="number" /><br/>
+			<label for="e_name" style="display: inline-block; width: 100px;">Name:</label>
+				<input id="e_name" th:field="*{name}" /><br/>
+			<label for="e_pos" style="display: inline-block; width: 100px;">Position:</label>
+				<input id="e_pos" th:field="*{position}" /><br/>
+			<label for="e_sal" style="display: inline-block; width: 100px;">Salary:</label>
+				<input id="e_sal" th:field="*{salary}" type="number" /><br/>
+			<label for="e_sd" style="display: inline-block; width: 100px;">Start date:</label>
+				<input id="e_sd" th:field="*{startDate}" /><br/>
+			<input type="submit" value="Add" />
+		</form>
+	</body>
+</html>
