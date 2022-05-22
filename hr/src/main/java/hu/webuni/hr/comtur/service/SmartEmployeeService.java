@@ -22,7 +22,7 @@ public class SmartEmployeeService implements EmployeeService {
 		Duration duration = Duration.between(employee.getStartDate(), LocalDateTime.now());
 		long days = duration.toDays();
 		
-		// We assume array values are sorted in ascending order and limit and percent indices match each other.
+		// We assume array values are sorted in descending order and limit and percent indices match each other.
 		for (int i = 0; i < hrConfigProperties.getEmployeesalary().getSmart().getLimit().length; ++i) {
 			if (days > hrConfigProperties.getEmployeesalary().getSmart().getLimit()[i] * DAYS_IN_YEAR) {
 				return hrConfigProperties.getEmployeesalary().getSmart().getPercent()[i];
