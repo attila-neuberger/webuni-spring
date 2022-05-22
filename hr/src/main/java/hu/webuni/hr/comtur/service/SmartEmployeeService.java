@@ -21,14 +21,13 @@ public class SmartEmployeeService implements EmployeeService {
 	public int getPayRaisePercent(Employee employee) {
 		Duration duration = Duration.between(employee.getStartDate(), LocalDateTime.now());
 		long days = duration.toDays();
-		if (days > hrConfigProperties.getEmployeesalary().getSmart().getLimit()[0] * DAYS_IN_YEAR) {
-			return hrConfigProperties.getEmployeesalary().getSmart().getPercent()[0];
-		} else if (days > hrConfigProperties.getEmployeesalary().getSmart().getLimit()[1] * DAYS_IN_YEAR) {
-			return hrConfigProperties.getEmployeesalary().getSmart().getPercent()[1];
-		} else if (days > hrConfigProperties.getEmployeesalary().getSmart().getLimit()[2] * DAYS_IN_YEAR) {
-			return hrConfigProperties.getEmployeesalary().getSmart().getPercent()[2];
-		} else {
-			return 0;
+		
+		// We assume array values are sorted in ascending order and limit and percent indices match each other.
+		for (int i = 0; i < hrConfigProperties.getEmployeesalary().getSmart().getLimit().length; ++i) {
+			if (days > hrConfigProperties.getEmployeesalary().getSmart().getLimit()[i] * DAYS_IN_YEAR) {
+				return hrConfigProperties.getEmployeesalary().getSmart().getPercent()[i];
+			}
 		}
+		return 0;
 	}
 }
