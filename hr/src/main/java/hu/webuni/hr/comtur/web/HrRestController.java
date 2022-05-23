@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import hu.webuni.hr.comtur.dto.EmployeeDto;
@@ -74,12 +75,12 @@ public class HrRestController {
 		return ResponseEntity.notFound().build();
 	}
 	
-	@GetMapping("/salaryThreshold={salary}")
-	public Collection<EmployeeDto> getEmployeesAboveSalary(@PathVariable int salary) {
-		System.out.println("Salary threshold: " + salary);
+	@GetMapping(params = "salaryThreshold")
+	public Collection<EmployeeDto> getEmployeesAboveSalary(@RequestParam int salaryThreshold) {
+		System.out.println("Salary threshold: " + salaryThreshold);
 		Collection<EmployeeDto> result = new ArrayList<>();
 		for (EmployeeDto employee : employees.values()) {
-			if (employee.getSalary() >= salary) {
+			if (employee.getSalary() >= salaryThreshold) {
 				result.add(employee);
 			}
 		}
