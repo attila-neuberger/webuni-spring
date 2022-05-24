@@ -1,8 +1,9 @@
 package hu.webuni.hr.comtur.model;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
-public class Employee {
+public class Employee implements Comparable<Employee> {
 
 	private long id;
 	private String name;
@@ -49,5 +50,27 @@ public class Employee {
 	}
 	public void setStartDate(LocalDateTime startDate) {
 		this.startDate = startDate;
+	}
+
+	@Override
+	public int compareTo(Employee o) {
+		return (int)(id - o.getId());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Employee other = (Employee) obj;
+		return id == other.id;
 	}
 }

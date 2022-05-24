@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import hu.webuni.hr.comtur.model.Employee;
 
-public class EmployeeDto extends Employee {
+public class EmployeeDto extends Employee implements IDtoKey {
 
 	public EmployeeDto() {
 		super();

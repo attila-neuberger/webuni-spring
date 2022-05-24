@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta charset="utf-8">
+		<title>HR application</title>
+	</head>
+	<body>
+		<h1>Employee</h1>
+		
+		<h3>Employee data:</h3>
+		<form th:action="@{/employeeModify}" method="post" th:object="${existingEmployee}">
+			<label for="e_id" style="display: inline-block; width: 100px;">ID:</label>
+				<input id="e_id" th:field="*{id}" type="number" readonly /><br/>
+			<label for="e_name" style="display: inline-block; width: 100px;">Name:</label>
+				<input id="e_name" th:field="*{name}" /><br/>
+			<label for="e_pos" style="display: inline-block; width: 100px;">Position:</label>
+				<input id="e_pos" th:field="*{position}" /><br/>
+			<label for="e_sal" style="display: inline-block; width: 100px;">Salary:</label>
+				<input id="e_sal" th:field="*{salary}" type="number" /><br/>
+			<label for="e_sd" style="display: inline-block; width: 100px;">Start date:</label>
+				<input id="e_sd" th:field="*{startDate}" /><br/>
+			<input type="submit" value="Modify" />
+		</form>
+	</body>
+</html>
