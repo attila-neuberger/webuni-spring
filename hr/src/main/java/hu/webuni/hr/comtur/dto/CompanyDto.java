@@ -4,12 +4,19 @@ import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 
 public class CompanyDto implements IDtoKey {
 	
+	@JsonView(VisibleView.class)
 	private long companyRegistrationNumber;
+	
+	@JsonView(VisibleView.class)
 	private String name;
+	
+	@JsonView(VisibleView.class)
 	private String address;
+	
 	private List<EmployeeDto> employees;
 
 	public CompanyDto() {}

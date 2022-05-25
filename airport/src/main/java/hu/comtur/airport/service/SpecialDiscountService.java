@@ -1,7 +1,6 @@
 package hu.comtur.airport.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import hu.comtur.airport.config.AirportConfigProperties;

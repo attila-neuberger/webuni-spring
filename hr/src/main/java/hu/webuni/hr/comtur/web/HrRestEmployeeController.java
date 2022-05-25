@@ -13,63 +13,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import hu.webuni.hr.comtur.dto.EmployeeDto;
-import hu.webuni.hr.comtur.service.SalaryService;
+import hu.webuni.hr.comtur.service.EmployeeService;
 
 @RestController
 @RequestMapping("/api/employees")
 public class HrRestEmployeeController extends HrBaseRestController<EmployeeDto> {
 	
-	/*private Map<Long, EmployeeDto> employees;
-	
-	{
-		employees = new HashMap<>();
-		employees.put(1L, new EmployeeDto(1L, "Attila", "Vezérigazgató", 1900, LocalDateTime.of(2010, 1, 1, 0, 0)));
-		employees.put(2L, new EmployeeDto(2L, "Edit", "HR-es", 1000, LocalDateTime.of(2018, 1, 1, 0, 0)));
-		employees.put(3L, new EmployeeDto(3L, "Mici", "Takarító", 800, LocalDateTime.of(2022, 1, 1, 0, 0)));
-		employees.put(4L, new EmployeeDto(4L, "Bandi", "Mindenes", 1234, LocalDateTime.of(2015, 1, 1, 0, 0)));
-	}
-	
-	@GetMapping
-	public Collection<EmployeeDto> getAll() {
-		return employees.values();
-	}
-
-	@GetMapping("/{id}")
-	public ResponseEntity<EmployeeDto> getById(@PathVariable long id) {
-		EmployeeDto employee = employees.get(id);
-		if (employee == null) {
-			return ResponseEntity.notFound().build();
-		}
-		return ResponseEntity.ok(employee);
-	}
-	
-	@PostMapping
-	public ResponseEntity<EmployeeDto> createEmployee(@RequestBody EmployeeDto employee) {
-		if (employees.containsKey(employee.getId())) {
-			return ResponseEntity.unprocessableEntity().build();
-		}
-		employees.put(employee.getId(), employee);
-		return ResponseEntity.ok(employee);
-	}
-	
-	@PutMapping("/{id}")
-	public ResponseEntity<EmployeeDto> modifyEmployee(@PathVariable long id, @RequestBody EmployeeDto employee) {
-		if (!employees.containsKey(id)) {
-			return ResponseEntity.notFound().build();
-		}
-		employee.setId(id);
-		employees.put(id, employee);
-		return ResponseEntity.ok(employee);
-	}
-	
-	@DeleteMapping("/{id}")
-	public ResponseEntity<EmployeeDto> deleteEmployee(@PathVariable long id) {
-		if (employees.containsKey(id)) {
-			employees.remove(id);
-			return ResponseEntity.accepted().build();
-		}
-		return ResponseEntity.notFound().build();
-	}*/
+	@Autowired
+	private EmployeeService employeeService;
 	
 	{
 		entities.put(1L, new EmployeeDto(1L, "Attila", "Vezérigazgató", 1900, LocalDateTime.of(2010, 1, 1, 0, 0)));
@@ -77,9 +28,6 @@ public class HrRestEmployeeController extends HrBaseRestController<EmployeeDto> 
 		entities.put(3L, new EmployeeDto(3L, "Mici", "Takarító", 800, LocalDateTime.of(2022, 1, 1, 0, 0)));
 		entities.put(4L, new EmployeeDto(4L, "Bandi", "Mindenes", 1234, LocalDateTime.of(2015, 1, 1, 0, 0)));
 	}
-	
-	@Autowired
-	private SalaryService salaryService;
 	
 	@GetMapping(params = "salaryThreshold")
 	public Collection<EmployeeDto> getEmployeesAboveSalary(@RequestParam int salaryThreshold) {
@@ -95,6 +43,6 @@ public class HrRestEmployeeController extends HrBaseRestController<EmployeeDto> 
 	
 	@PostMapping("/raise")
 	public int getPayRaisePercent(@RequestBody EmployeeDto employee) {
-		return salaryService.getPayRaisePercent(employee);
+		return employeeService.getPayRaisePercent(employee);
 	}
 }

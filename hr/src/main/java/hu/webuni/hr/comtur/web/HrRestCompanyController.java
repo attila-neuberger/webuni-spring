@@ -13,12 +13,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 import hu.webuni.hr.comtur.dto.CompanyDto;
-import hu.webuni.hr.comtur.dto.CompanyDtoHideNavigation;
 import hu.webuni.hr.comtur.dto.EmployeeDto;
+import hu.webuni.hr.comtur.dto.VisibleView;
 
 @RestController
 @RequestMapping("/api/companies")
@@ -34,42 +35,62 @@ public class HrRestCompanyController extends HrBaseRestController<CompanyDto> {
 	
 	@Override
 	@GetMapping
+	@JsonView(VisibleView.class)
 	public Collection<CompanyDto> getAll() {
+		return getAllCompaniewWithoutEmployees();
+	}
+
+	private Collection<CompanyDto> getAllCompaniewWithoutEmployees() {
 		Collection<CompanyDto> result = new ArrayList<>(entities.size());
 		for (CompanyDto company : entities.values()) {
-			result.add(new CompanyDtoHideNavigation(company.getCompanyRegistrationNumber(), company.getName(), company.getAddress(), null));
+			result.add(new CompanyDto(company.getCompanyRegistrationNumber(), company.getName(), company.getAddress(), null));
 		}
 		return result;
 	}
 	
-	@GetMapping(params = "full")
-	public Collection<CompanyDto> getAllWithEmployees(@RequestParam boolean full) {
-		if (full) {
-			return entities.values();
-		}
-		return getAll();
+	@GetMapping(params = "full=true")
+	public Collection<CompanyDto> getAllWithEmployees() {
+		return entities.values();
+	}
+	
+	@GetMapping(params = "full=false")
+	@JsonView(VisibleView.class)
+	public Collection<CompanyDto> getAllWithoutEmployees() {
+		return getAllCompaniewWithoutEmployees();
 	}
 	
 	@Override
 	@GetMapping("/{id}")
+	@JsonView(VisibleView.class)
 	public ResponseEntity<CompanyDto> getById(@PathVariable long id) {
+		return getCompanyWithoutEmployees(id);
+	}
+
+	private ResponseEntity<CompanyDto> getCompanyWithoutEmployees(long id) {
 		CompanyDto entity = entities.get(id);
 		if (entity == null) {
 			return ResponseEntity.notFound().build();
 		}
-		return ResponseEntity.ok(new CompanyDtoHideNavigation(entity.getId(), entity.getName(), entity.getAddress(), null));
+		return ResponseEntity.ok(new CompanyDto(entity.getId(), entity.getName(), entity.getAddress(), null));
 	}
 	
-	@GetMapping(value = "/{id}", params = "full")
-	public ResponseEntity<CompanyDto> getByIdWithEmployees(@PathVariable long id, @RequestParam boolean full) {
+	@GetMapping(value = "/{id}", params = "full=true")
+	public ResponseEntity<CompanyDto> getByIdWithEmployees(@PathVariable long id) {
 		CompanyDto entity = entities.get(id);
 		if (entity == null) {
 			return ResponseEntity.notFound().build();
 		}
-		if (full) {
-			return ResponseEntity.ok(entity);
+		return ResponseEntity.ok(entity);
+	}
+	
+	@GetMapping(value = "/{id}", params = "full=false")
+	@JsonView(VisibleView.class)
+	public ResponseEntity<CompanyDto> getByIdWithoutEmployees(@PathVariable long id) {
+		CompanyDto entity = entities.get(id);
+		if (entity == null) {
+			return ResponseEntity.notFound().build();
 		}
-		return getById(id);
+		return getCompanyWithoutEmployees(id);
 	}
 	
 	@PostMapping("/{companyId}/add")
