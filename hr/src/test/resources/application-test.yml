@@ -1,0 +1,7 @@
+hr:
+  employeesalary:
+    def:
+      percent: 5
+    smart:
+      limit: [10, 5, 2.5]
+      percent: [50, 5, 2]

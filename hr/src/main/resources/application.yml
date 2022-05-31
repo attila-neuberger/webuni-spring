@@ -14,3 +14,7 @@ hr:
     smart:
       limit: [10, 5, 2.5]
       percent: [10, 5, 2]
+
+server:
+  error:
+    include-message: always

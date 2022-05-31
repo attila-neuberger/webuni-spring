@@ -1,10 +1,8 @@
-package hu.comtur.airport.dto;
-
-import java.util.Objects;
+package hu.comtur.airport.model;
 
 import javax.validation.constraints.Size;
 
-public class AirportDto {
+public class Airport {
 
 	private long id;
 	
@@ -12,9 +10,9 @@ public class AirportDto {
 	private String name;
 	private String iata;
 	
-	public AirportDto() {}
+	public Airport() {}
 	
-	public AirportDto(long id, String name, String iata) {
+	public Airport(long id, String name, String iata) {
 		this.id = id;
 		this.name = name;
 		this.iata = iata;
@@ -37,22 +35,5 @@ public class AirportDto {
 	}
 	public void setIata(String iata) {
 		this.iata = iata;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(id);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		AirportDto other = (AirportDto) obj;
-		return id == other.id;
 	}
 }
