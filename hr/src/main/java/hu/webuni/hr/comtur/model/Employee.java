@@ -3,7 +3,9 @@ package hu.webuni.hr.comtur.model;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class Employee implements Comparable<Employee> {
+import hu.webuni.hr.comtur.dto.IDtoKey;
+
+public class Employee implements IDtoKey, Comparable<Employee> {
 
 	private long id;
 	private String name;
@@ -21,33 +23,44 @@ public class Employee implements Comparable<Employee> {
 		this.startDate = startDate;
 	}
 	
+	@Override
 	public long getId() {
 		return id;
 	}
+	
+	@Override
 	public void setId(long id) {
 		this.id = id;
 	}
+	
 	public String getName() {
 		return name;
 	}
+	
 	public void setName(String name) {
 		this.name = name;
 	}
+	
 	public String getPosition() {
 		return position;
 	}
+	
 	public void setPosition(String position) {
 		this.position = position;
 	}
+	
 	public int getSalary() {
 		return salary;
 	}
+	
 	public void setSalary(int salary) {
 		this.salary = salary;
 	}
+	
 	public LocalDateTime getStartDate() {
 		return startDate;
 	}
+	
 	public void setStartDate(LocalDateTime startDate) {
 		this.startDate = startDate;
 	}

@@ -10,7 +10,7 @@ import hu.webuni.hr.comtur.config.HrConfigProperties;
 import hu.webuni.hr.comtur.model.Employee;
 
 @Service
-public class SmartEmployeeService implements EmployeeService {
+public class SmartEmployeeService extends EmployeeService {
 	
 	private final static int DAYS_IN_YEAR = 365;
 	

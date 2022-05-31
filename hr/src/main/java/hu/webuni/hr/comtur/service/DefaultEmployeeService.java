@@ -7,7 +7,7 @@ import hu.webuni.hr.comtur.config.HrConfigProperties;
 import hu.webuni.hr.comtur.model.Employee;
 
 @Service
-public class DefaultEmployeeService implements EmployeeService {
+public class DefaultEmployeeService extends EmployeeService {
 	
 	@Autowired
 	HrConfigProperties hrConfigProperties;
