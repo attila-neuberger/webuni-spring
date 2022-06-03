@@ -14,9 +14,9 @@ import hu.webuni.hr.comtur.model.Employee;
 public class SalaryService {
 
 	@Autowired
-	private IEmployeeService iEmployeeService;
+	private EmployeeService employeeService;
 	
 	public void setNewSalary(Employee employee) {
-		employee.setSalary((int)(employee.getSalary() / 100.0 * (100 + iEmployeeService.getPayRaisePercent(employee))));
+		employee.setSalary((int)(employee.getSalary() / 100.0 * (100 + employeeService.getPayRaisePercent(employee))));
 	}
 }
