@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import hu.webuni.hr.comtur.dto.CompanyDto;
-import hu.webuni.hr.comtur.dto.VisibleView;
+import hu.webuni.hr.comtur.dto.Views;
 import hu.webuni.hr.comtur.mapper.CompanyMapper;
 import hu.webuni.hr.comtur.model.Company;
 import hu.webuni.hr.comtur.model.Employee;
@@ -41,7 +41,7 @@ public class HrRestCompanyController {
 	CompanyMapper companyMapper;
 	
 	@GetMapping
-	@JsonView(VisibleView.class)
+	@JsonView(Views.VisibleData.class)
 	public Collection<CompanyDto> getAll() {
 		Collection<CompanyDto> result = new ArrayList<>();
 		for (Company company : companyService.findAll()) {
@@ -56,7 +56,7 @@ public class HrRestCompanyController {
 	}
 	
 	@GetMapping("/{id}")
-	@JsonView(VisibleView.class)
+	@JsonView(Views.VisibleData.class)
 	public ResponseEntity<CompanyDto> getById(@PathVariable long id) {
 		CompanyDto entity = companyMapper.companyToDto(companyService.findById(id));
 		if (entity == null) {

@@ -6,15 +6,17 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 
+import hu.webuni.hr.comtur.dto.Views.VisibleData;
+
 public class CompanyDto implements IDtoKey {
 	
-	@JsonView(VisibleView.class)
+	@JsonView(VisibleData.class)
 	private long companyRegistrationNumber;
 	
-	@JsonView(VisibleView.class)
+	@JsonView(VisibleData.class)
 	private String name;
 	
-	@JsonView(VisibleView.class)
+	@JsonView(VisibleData.class)
 	private String address;
 	
 	private List<EmployeeDto> employees;
