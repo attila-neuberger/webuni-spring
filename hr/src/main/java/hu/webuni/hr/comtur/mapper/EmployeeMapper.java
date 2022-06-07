@@ -11,12 +11,10 @@ import hu.webuni.hr.comtur.model.Employee;
 @Mapper(componentModel = "spring")
 public interface EmployeeMapper {
 	
-	@Mapping(source = "company", target = "companyDto")
 	EmployeeDto employeeToDto(Employee employee);
 
 	List<EmployeeDto> employeesToDtos(List<Employee> employees);
 
-	@Mapping(source = "companyDto", target = "company")
 	Employee dtoToEmployee(EmployeeDto employeeDto);
 	
 	List<Employee> dtosToEmployees(List<EmployeeDto> employeeDtos);
