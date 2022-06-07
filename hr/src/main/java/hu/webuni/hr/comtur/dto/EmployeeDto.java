@@ -7,6 +7,8 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Positive;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class EmployeeDto implements IDtoKey, Comparable<EmployeeDto> {
 
 	private long id;
@@ -23,6 +25,9 @@ public class EmployeeDto implements IDtoKey, Comparable<EmployeeDto> {
 	@Past
 	private LocalDateTime startDate;
 	
+	@JsonIgnore
+	private CompanyDto companyDto;
+	
 	public EmployeeDto() {}
 	
 	public EmployeeDto(long id, String name, String position, int salary, LocalDateTime startDate) {
@@ -36,32 +41,49 @@ public class EmployeeDto implements IDtoKey, Comparable<EmployeeDto> {
 	public long getId() {
 		return id;
 	}
+	
 	public void setId(long id) {
 		this.id = id;
 	}
+	
 	public String getName() {
 		return name;
 	}
+	
 	public void setName(String name) {
 		this.name = name;
 	}
+	
 	public String getPosition() {
 		return position;
 	}
+	
 	public void setPosition(String position) {
 		this.position = position;
 	}
+	
 	public int getSalary() {
 		return salary;
 	}
+	
 	public void setSalary(int salary) {
 		this.salary = salary;
 	}
+	
 	public LocalDateTime getStartDate() {
 		return startDate;
 	}
+	
 	public void setStartDate(LocalDateTime startDate) {
 		this.startDate = startDate;
+	}
+
+	public CompanyDto getCompanyDto() {
+		return companyDto;
+	}
+
+	public void setCompanyDto(CompanyDto companyDto) {
+		this.companyDto = companyDto;
 	}
 
 	@Override

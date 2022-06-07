@@ -11,6 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import hu.webuni.hr.comtur.dto.IDtoKey;
 
 @Entity
@@ -28,8 +30,9 @@ public class Employee implements IDtoKey, Comparable<Employee> {
 	
 	private LocalDateTime startDate;
 	
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
 	@JoinColumn(name = "company_id")
+	@JsonIgnore
 	private Company company;
 	
 	public Employee() {}

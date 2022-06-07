@@ -1,5 +1,6 @@
 package hu.webuni.hr.comtur.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,17 +25,19 @@ public class Company implements IDtoKey {
 	
 	private String address;
 	
-	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "company", cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
 	private List<Employee> employees;
 
-	public Company() {}
+	public Company() {
+		this.employees = new ArrayList<>();
+	}
 
-	public Company(long id, String name, String address, List<Employee> employees) {
+	public Company(long id, long companyRegistrationNumber, String name, String address, List<Employee> employees) {
 		this.id = id;
-		this.companyRegistrationNumber = id;
+		this.companyRegistrationNumber = companyRegistrationNumber;
 		this.name = name;
 		this.address = address;
-		this.employees = employees;
+		this.employees = employees == null ? new ArrayList<>() : employees;
 	}
 	
 	@Override
@@ -72,7 +75,7 @@ public class Company implements IDtoKey {
 	}
 	
 	public List<Employee> getEmployees() {
-		return employees;
+		return employees == null ? new ArrayList<>() : employees;
 	}
 	
 	public void setEmployees(List<Employee> employees) {

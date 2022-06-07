@@ -46,7 +46,8 @@ public class HrRestCompanyController {
 	public Collection<CompanyDto> getAll() {
 		Collection<CompanyDto> result = new ArrayList<>();
 		for (Company company : companyService.findAll()) {
-			result.add(new CompanyDto(company.getCompanyRegistrationNumber(), company.getName(), company.getAddress(), null));
+			result.add(new CompanyDto(company.getId(), company.getCompanyRegistrationNumber(), company.getName(),
+					company.getAddress(), null));
 		}
 		return result;
 	}
@@ -59,11 +60,12 @@ public class HrRestCompanyController {
 	@GetMapping("/{id}")
 	@JsonView(Views.VisibleData.class)
 	public ResponseEntity<CompanyDto> getById(@PathVariable long id) {
-		CompanyDto entity = companyMapper.companyToDto(companyService.findById(id).orElseThrow());
-		if (entity == null) {
+		CompanyDto company = companyMapper.companyToDto(companyService.findById(id).orElseThrow());
+		if (company == null) {
 			return ResponseEntity.notFound().build();
 		}
-		return ResponseEntity.ok(new CompanyDto(entity.getId(), entity.getName(), entity.getAddress(), null));
+		return ResponseEntity.ok(new CompanyDto(company.getId(), company.getCompanyRegistrationNumber(), company.getName(),
+				company.getAddress(), null));
 	}
 
 	@GetMapping(value = "/{id}", params = "full=true")

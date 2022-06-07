@@ -44,7 +44,7 @@ public class HrRestEmployeeController {
 	
 	@GetMapping
 	public Collection<EmployeeDto> getAll() {
-		return employeeMapper.employeeToDtos(employeeService.findAll());
+		return employeeMapper.employeesToDtos(employeeService.findAll());
 	}
 
 	@GetMapping("/{id}")
@@ -104,13 +104,13 @@ public class HrRestEmployeeController {
 	@GetMapping(params = "position")
 	public Collection<EmployeeDto> getEmployeesWithPosition(@RequestParam String position) {
 		System.out.println("Employee REST get position: " + position);
-		return employeeMapper.employeeToDtos(employeeService.findByPosition(position));
+		return employeeMapper.employeesToDtos(employeeService.findByPosition(position));
 	}
 	
 	@GetMapping(params = "name")
 	public Collection<EmployeeDto> getEmployeesWithNameStartingWith(@RequestParam String name) {
 		System.out.println("Employee REST get name starting with (ignore case): " + name);
-		return employeeMapper.employeeToDtos(employeeService.findByNameStartingWith(name));
+		return employeeMapper.employeesToDtos(employeeService.findByNameStartingWith(name));
 	}
 	
 	@GetMapping(params = {"startDateFrom", "startDateTo"})
@@ -119,6 +119,6 @@ public class HrRestEmployeeController {
 		DateFormat df = new SimpleDateFormat("yyyy.MM.dd. HH:mm:ss");
 		System.out.println("Employee REST get start date between: " + df.format(new Date(startDateFrom.toEpochSecond(ZoneOffset.UTC) * 1000))
 				+ " - " + df.format(new Date(startDateTo.toEpochSecond(ZoneOffset.UTC) * 1000)));
-		return employeeMapper.employeeToDtos(employeeService.findByStartDateBetween(startDateFrom, startDateTo));
+		return employeeMapper.employeesToDtos(employeeService.findByStartDateBetween(startDateFrom, startDateTo));
 	}
 }
