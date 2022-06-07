@@ -1,7 +1,12 @@
 package hu.webuni.hr.comtur.web;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 
 import javax.validation.Valid;
 
@@ -44,7 +49,7 @@ public class HrRestEmployeeController {
 
 	@GetMapping("/{id}")
 	public EmployeeDto getById(@PathVariable long id) {
-		Employee employee = employeeService.findById(id);
+		Employee employee = employeeService.findById(id).orElseThrow();
 		if (employee == null) {
 			throw new EmployeeException(String.format("Employee with ID '%d' does not exist.", id));
 		}
@@ -53,7 +58,7 @@ public class HrRestEmployeeController {
 	
 	@PostMapping
 	public EmployeeDto create(@RequestBody @Valid EmployeeDto employeeDto) {
-		if (employeeService.containsKey(employeeDto.getId())) {
+		if (employeeService.exists(employeeDto.getId())) {
 			throw new EmployeeException(String.format("Employee with ID '%d' already exists.", employeeDto.getId()));
 		}
 		Employee employee = employeeService.save(employeeMapper.dtoToEmployee(employeeDto));
@@ -62,7 +67,7 @@ public class HrRestEmployeeController {
 	
 	@PutMapping("/{id}")
 	public EmployeeDto modify(@PathVariable long id, @RequestBody @Valid EmployeeDto employeeDto) {
-		if (!employeeService.containsKey(id)) {
+		if (!employeeService.exists(id)) {
 			throw new EmployeeException(String.format("Employee with ID '%d' does not exist.", id));
 		}
 		employeeDto.setId(id);
@@ -72,7 +77,7 @@ public class HrRestEmployeeController {
 	
 	@DeleteMapping("/{id}")
 	public void remove(@PathVariable long id) {
-		if (employeeService.containsKey(id)) {
+		if (employeeService.exists(id)) {
 			employeeService.delete(id);
 		} else {
 			throw new EmployeeException(String.format("Employee with ID '%d' does not exist.", id));
@@ -81,7 +86,7 @@ public class HrRestEmployeeController {
 	
 	@GetMapping(params = "salaryThreshold")
 	public Collection<EmployeeDto> getEmployeesAboveSalary(@RequestParam int salaryThreshold) {
-		System.out.println("Salary threshold: " + salaryThreshold);
+		System.out.println("Employee REST get with salary threshold: " + salaryThreshold);
 		Collection<EmployeeDto> result = new ArrayList<>();
 		for (Employee employee : employeeService.findAll()) {
 			if (employee.getSalary() >= salaryThreshold) {
@@ -94,5 +99,26 @@ public class HrRestEmployeeController {
 	@PostMapping("/raise")
 	public int getPayRaisePercent(@RequestBody Employee employee) {
 		return employeeService.getPayRaisePercent(employee);
+	}
+	
+	@GetMapping(params = "position")
+	public Collection<EmployeeDto> getEmployeesWithPosition(@RequestParam String position) {
+		System.out.println("Employee REST get position: " + position);
+		return employeeMapper.employeeToDtos(employeeService.findByPosition(position));
+	}
+	
+	@GetMapping(params = "name")
+	public Collection<EmployeeDto> getEmployeesWithNameStartingWith(@RequestParam String name) {
+		System.out.println("Employee REST get name starting with (ignore case): " + name);
+		return employeeMapper.employeeToDtos(employeeService.findByNameStartingWith(name));
+	}
+	
+	@GetMapping(params = {"startDateFrom", "startDateTo"})
+	public Collection<EmployeeDto> getEmployeesWithStartDateBetween(@RequestParam LocalDateTime startDateFrom,
+			@RequestParam LocalDateTime startDateTo) {
+		DateFormat df = new SimpleDateFormat("yyyy.MM.dd. HH:mm:ss");
+		System.out.println("Employee REST get start date between: " + df.format(new Date(startDateFrom.toEpochSecond(ZoneOffset.UTC) * 1000))
+				+ " - " + df.format(new Date(startDateTo.toEpochSecond(ZoneOffset.UTC) * 1000)));
+		return employeeMapper.employeeToDtos(employeeService.findByStartDateBetween(startDateFrom, startDateTo));
 	}
 }

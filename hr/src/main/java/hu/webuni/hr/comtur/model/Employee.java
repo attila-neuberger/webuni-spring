@@ -3,15 +3,34 @@ package hu.webuni.hr.comtur.model;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
 import hu.webuni.hr.comtur.dto.IDtoKey;
 
+@Entity
 public class Employee implements IDtoKey, Comparable<Employee> {
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
+	
 	private String name;
+	
 	private String position;
+	
 	private int salary;
+	
 	private LocalDateTime startDate;
+	
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "company_id")
+	private Company company;
 	
 	public Employee() {}
 	
@@ -63,6 +82,14 @@ public class Employee implements IDtoKey, Comparable<Employee> {
 	
 	public void setStartDate(LocalDateTime startDate) {
 		this.startDate = startDate;
+	}
+
+	public Company getCompany() {
+		return company;
+	}
+
+	public void setCompany(Company company) {
+		this.company = company;
 	}
 
 	@Override

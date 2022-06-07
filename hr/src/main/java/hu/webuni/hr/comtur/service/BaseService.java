@@ -1,38 +1,45 @@
 package hu.webuni.hr.comtur.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import hu.webuni.hr.comtur.dto.IDtoKey;
 
 public class BaseService<T extends IDtoKey> {
-
-	/**
-	 * Map of IDs - entities.
-	 */
-	protected Map<Long, T> entities;
 	
-	{
-		entities = new HashMap<>();
+	@Autowired
+	protected JpaRepository<T, Long> repository;
+
+	@Transactional
+	public T save(T t) {
+		return repository.save(t);
 	}
 	
-	public T save(T t) {
-		entities.put(t.getId(), t); // Unique check does not happen here (can be replaced during modify).
-		return t;
+	@Transactional
+	public T update(T t) {
+		if (repository.existsById(t.getId())) {
+			return repository.save(t);
+		} else {
+			throw new NoSuchElementException();
+		}
 	}
 	
 	public List<T> findAll() {
-		return new ArrayList<>(entities.values());
+		return repository.findAll();
 	}
 	
-	public T findById(long id) {
-		return entities.get(id);
+	public Optional<T> findById(long id) {
+		return repository.findById(id);
 	}
 	
+	@Transactional
 	public void delete(long id) {
-		entities.remove(id);
+		repository.deleteById(id);
 	}
 
 	/**
@@ -40,7 +47,7 @@ public class BaseService<T extends IDtoKey> {
 	 * @param id ID to search for.
 	 * @return Entity with the ID exists.
 	 */
-	public boolean containsKey(long id) {
-		return entities.containsKey(id);
+	public boolean exists(long id) {
+		return repository.existsById(id);
 	}
 }

@@ -1,0 +1,17 @@
+{"properties": [
+  {
+    "name": "hr.employeesalary.def.percent",
+    "type": "int",
+    "description": "Salary raise percent (default profile)"
+  },
+  {
+    "name": "hr.employeesalary.smart.limit",
+    "type": "double[]",
+    "description": "Double array of work-year limits (smart profile)"
+  },
+  {
+    "name": "hr.employeesalary.smart.percent",
+    "type": "int[]",
+    "description": "Int array of salary raise percents (smart profile)"
+  }
+]}

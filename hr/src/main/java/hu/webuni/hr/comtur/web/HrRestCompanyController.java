@@ -35,7 +35,8 @@ import hu.webuni.hr.comtur.service.CompanyService;
 @RequestMapping("/api/companies")
 public class HrRestCompanyController {
 	
-	CompanyService companyService = new CompanyService();
+	@Autowired
+	CompanyService companyService;
 	
 	@Autowired
 	CompanyMapper companyMapper;
@@ -58,7 +59,7 @@ public class HrRestCompanyController {
 	@GetMapping("/{id}")
 	@JsonView(Views.VisibleData.class)
 	public ResponseEntity<CompanyDto> getById(@PathVariable long id) {
-		CompanyDto entity = companyMapper.companyToDto(companyService.findById(id));
+		CompanyDto entity = companyMapper.companyToDto(companyService.findById(id).orElseThrow());
 		if (entity == null) {
 			return ResponseEntity.notFound().build();
 		}
@@ -67,7 +68,7 @@ public class HrRestCompanyController {
 
 	@GetMapping(value = "/{id}", params = "full=true")
 	public ResponseEntity<CompanyDto> getByIdWithEmployees(@PathVariable long id) {
-		CompanyDto entity = companyMapper.companyToDto(companyService.findById(id));
+		CompanyDto entity = companyMapper.companyToDto(companyService.findById(id).orElseThrow());
 		if (entity == null) {
 			return ResponseEntity.notFound().build();
 		}
@@ -76,7 +77,7 @@ public class HrRestCompanyController {
 	
 	@PostMapping
 	public ResponseEntity<CompanyDto> create(@RequestBody @Valid CompanyDto companyDto) {
-		if (companyService.containsKey(companyDto.getId())) {
+		if (companyService.exists(companyDto.getId())) {
 			return ResponseEntity.unprocessableEntity().build();
 		}
 		Company company = companyService.save(companyMapper.dtoToCompany(companyDto));
@@ -85,7 +86,7 @@ public class HrRestCompanyController {
 	
 	@PutMapping("/{id}")
 	public ResponseEntity<CompanyDto> modify(@PathVariable long id, @RequestBody @Valid CompanyDto companyDto) {
-		if (!companyService.containsKey(id)) {
+		if (!companyService.exists(id)) {
 			return ResponseEntity.notFound().build();
 		}
 		companyDto.setId(id);
@@ -95,7 +96,7 @@ public class HrRestCompanyController {
 	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<CompanyDto> remove(@PathVariable long id) {
-		if (companyService.containsKey(id)) {
+		if (companyService.exists(id)) {
 			companyService.delete(id);
 			return ResponseEntity.accepted().build();
 		}
@@ -104,10 +105,10 @@ public class HrRestCompanyController {
 	
 	@PostMapping("/{companyId}/add")
 	public ResponseEntity<CompanyDto> createEmployeeForCompany(@RequestBody Employee employee, @PathVariable long companyId) {
-		if (!companyService.containsKey(companyId)) {
+		if (!companyService.exists(companyId)) {
 			return ResponseEntity.notFound().build();
 		}
-		Company company = companyService.findById(companyId);
+		Company company = companyService.findById(companyId).orElseThrow();
 		if (company.getEmployees() == null) {
 			List<Employee> employeeList = new ArrayList<>(1);
 			employeeList.add(employee);
@@ -120,10 +121,10 @@ public class HrRestCompanyController {
 	
 	@DeleteMapping("/{companyId}/delete/{employeeId}")
 	public ResponseEntity<CompanyDto> deleteEmployeeFromCompany(@PathVariable long companyId, @PathVariable long employeeId) {
-		if (!companyService.containsKey(companyId)) {
+		if (!companyService.exists(companyId)) {
 			return ResponseEntity.notFound().build();
 		}
-		Company company = companyService.findById(companyId);
+		Company company = companyService.findById(companyId).orElseThrow();
 		if (company.getEmployees() == null) {
 			return ResponseEntity.notFound().build();
 		}
@@ -142,10 +143,10 @@ public class HrRestCompanyController {
 	
 	@PutMapping("/{companyId}/swap")
 	public ResponseEntity<CompanyDto> swapEmployeesOfCompany(@RequestBody List<Employee> employees, @PathVariable long companyId) {
-		if (!companyService.containsKey(companyId)) {
+		if (!companyService.exists(companyId)) {
 			return ResponseEntity.notFound().build();
 		}
-		Company company = companyService.findById(companyId);
+		Company company = companyService.findById(companyId).orElseThrow();
 		company.setEmployees(employees);
 		return ResponseEntity.ok(companyMapper.companyToDto(company));
 	}
