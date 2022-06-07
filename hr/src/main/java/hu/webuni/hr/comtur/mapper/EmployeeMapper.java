@@ -3,7 +3,6 @@ package hu.webuni.hr.comtur.mapper;
 import java.util.List;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 import hu.webuni.hr.comtur.dto.EmployeeDto;
 import hu.webuni.hr.comtur.model.Employee;
