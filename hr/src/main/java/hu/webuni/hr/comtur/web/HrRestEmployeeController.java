@@ -4,7 +4,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
@@ -87,13 +86,14 @@ public class HrRestEmployeeController {
 	@GetMapping(params = "salaryThreshold")
 	public Collection<EmployeeDto> getEmployeesAboveSalary(@RequestParam int salaryThreshold) {
 		System.out.println("Employee REST get with salary threshold: " + salaryThreshold);
-		Collection<EmployeeDto> result = new ArrayList<>();
+		/*Collection<EmployeeDto> result = new ArrayList<>();
 		for (Employee employee : employeeService.findAll()) {
 			if (employee.getSalary() >= salaryThreshold) {
 				result.add(employeeMapper.employeeToDto(employee));
 			}
 		}
-		return result;
+		return result;*/
+		return employeeMapper.employeesToDtos(employeeService.findBySalaryGreaterThan(salaryThreshold));
 	}
 	
 	@PostMapping("/raise")

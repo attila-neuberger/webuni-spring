@@ -9,6 +9,8 @@ import hu.webuni.hr.comtur.model.Employee;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
+	List<Employee> findBySalaryGreaterThan(int salary);
+	
 	List<Employee> findByPosition(String position);
 	
 	List<Employee> findByNameIgnoreCaseStartingWith(String name);

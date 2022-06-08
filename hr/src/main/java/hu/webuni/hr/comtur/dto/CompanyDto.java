@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import hu.webuni.hr.comtur.dto.Views.VisibleData;
@@ -23,7 +22,6 @@ public class CompanyDto implements IDtoKey {
 	@JsonView(VisibleData.class)
 	private String address;
 	
-	@JsonIgnoreProperties("company")
 	private List<EmployeeDto> employees;
 
 	public CompanyDto() {
@@ -73,7 +71,7 @@ public class CompanyDto implements IDtoKey {
 	}
 
 	public List<EmployeeDto> getEmployees() {
-		return employees == null ? new ArrayList<>() : employees;
+		return employees;
 	}
 
 	public void setEmployees(List<EmployeeDto> employees) {

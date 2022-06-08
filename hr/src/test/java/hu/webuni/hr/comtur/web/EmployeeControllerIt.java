@@ -33,7 +33,8 @@ public class EmployeeControllerIt {
 				// .usingRecursiveFieldByFieldElementComparator() // Not needed because equals and hashCode are overridden.
 				.containsExactlyElementsOf(employeesBefore);
 		assertThat(employeesAfter.get(employeesAfter.size() - 1))
-				// .usingRecursiveComparison() // Not needed because equals and hashCode are overridden.
+				.usingRecursiveComparison()
+				.ignoringFields("id")
 				.isEqualTo(employeeDto);
 	}
 	
@@ -107,9 +108,9 @@ public class EmployeeControllerIt {
 		if (!employeesBefore.isEmpty()) {
 			EmployeeDto employeeDto = employeesBefore.get(0);
 			EmployeeDto employeeDtoSavedState = new EmployeeDto(employeeDto.getId(), 
-					employeeDto.getName(), employeeDto.getPosition(), employeeDto.getSalary(), employeeDto.getStartDate());
+					employeeDto.getName(), employeeDto.getTitle(), employeeDto.getSalary(), employeeDto.getStartDate());
 			employeeDto.setName(employeeDto.getName() + " (modified)");
-			employeeDto.setPosition(employeeDto.getPosition() + " (modified)");
+			employeeDto.setTitle(employeeDto.getTitle() + " (modified)");
 			employeeDto.setSalary(employeeDto.getSalary() + 1);
 			employeeDto.setStartDate(employeeDto.getStartDate().minusYears(1));
 			modifyEmployee(employeeDto);
@@ -123,7 +124,7 @@ public class EmployeeControllerIt {
 			assertThat(employeesAfter.get(0)).isEqualTo(employeeDto);
 			assertThat(employeesAfter.get(0).getId()).isEqualTo(employeeDtoSavedState.getId());
 			assertThat(employeesAfter.get(0).getName()).isEqualTo(employeeDtoSavedState.getName() + " (modified)");
-			assertThat(employeesAfter.get(0).getPosition()).isEqualTo(employeeDtoSavedState.getPosition() + " (modified)");
+			assertThat(employeesAfter.get(0).getTitle()).isEqualTo(employeeDtoSavedState.getTitle() + " (modified)");
 			assertThat(employeesAfter.get(0).getSalary()).isEqualTo(employeeDtoSavedState.getSalary() + 1);
 			assertThat(employeesAfter.get(0).getStartDate()).isEqualTo(employeeDtoSavedState.getStartDate().minusYears(1));
 		}
@@ -149,13 +150,13 @@ public class EmployeeControllerIt {
 		if (!employeesBefore.isEmpty()) {
 			EmployeeDto employeeDto = employeesBefore.get(0);
 			EmployeeDto employeeDtoSavedState = new EmployeeDto(employeeDto.getId(), 
-					employeeDto.getName(), employeeDto.getPosition(), employeeDto.getSalary(), employeeDto.getStartDate());
+					employeeDto.getName(), employeeDto.getTitle(), employeeDto.getSalary(), employeeDto.getStartDate());
 			employeeDto.setName("");
 			modifyInvalidEmployee(employeeDto);
 			employeeDto.setName(employeeDtoSavedState.getName());
-			employeeDto.setPosition("");
+			employeeDto.setTitle("");
 			modifyInvalidEmployee(employeeDto);
-			employeeDto.setPosition(employeeDtoSavedState.getPosition());
+			employeeDto.setTitle(employeeDtoSavedState.getTitle());
 			employeeDto.setSalary(-1);
 			modifyInvalidEmployee(employeeDto);
 			employeeDto.setSalary(employeeDtoSavedState.getSalary());

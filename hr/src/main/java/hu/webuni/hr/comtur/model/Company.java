@@ -75,11 +75,19 @@ public class Company implements IDtoKey {
 	}
 	
 	public List<Employee> getEmployees() {
-		return employees == null ? new ArrayList<>() : employees;
+		return employees;
 	}
 	
 	public void setEmployees(List<Employee> employees) {
 		this.employees = employees;
+	}
+	
+	public void addEmployee(Employee employee) {
+		if (employees == null) {
+			employees = new ArrayList<>();
+		}
+		employees.add(employee);
+		employee.setCompany(this);
 	}
 
 	@Override

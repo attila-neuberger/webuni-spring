@@ -7,8 +7,6 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Positive;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 public class EmployeeDto implements IDtoKey, Comparable<EmployeeDto> {
 
 	private long id;
@@ -17,7 +15,7 @@ public class EmployeeDto implements IDtoKey, Comparable<EmployeeDto> {
 	private String name;
 	
 	@NotEmpty
-	private String position;
+	private String title;
 	
 	@Positive
 	private int salary;
@@ -25,15 +23,14 @@ public class EmployeeDto implements IDtoKey, Comparable<EmployeeDto> {
 	@Past
 	private LocalDateTime startDate;
 	
-	@JsonIgnore
-	private CompanyDto companyDto;
+	// private CompanyDto companyDto;
 	
 	public EmployeeDto() {}
 	
-	public EmployeeDto(long id, String name, String position, int salary, LocalDateTime startDate) {
+	public EmployeeDto(long id, String name, String title, int salary, LocalDateTime startDate) {
 		this.id = id;
 		this.name = name;
-		this.position = position;
+		this.title = title;
 		this.salary = salary;
 		this.startDate = startDate;
 	}
@@ -54,12 +51,12 @@ public class EmployeeDto implements IDtoKey, Comparable<EmployeeDto> {
 		this.name = name;
 	}
 	
-	public String getPosition() {
-		return position;
+	public String getTitle() {
+		return title;
 	}
 	
-	public void setPosition(String position) {
-		this.position = position;
+	public void setTitle(String title) {
+		this.title = title;
 	}
 	
 	public int getSalary() {
@@ -78,13 +75,13 @@ public class EmployeeDto implements IDtoKey, Comparable<EmployeeDto> {
 		this.startDate = startDate;
 	}
 
-	public CompanyDto getCompanyDto() {
+	/*public CompanyDto getCompanyDto() {
 		return companyDto;
 	}
 
 	public void setCompanyDto(CompanyDto companyDto) {
 		this.companyDto = companyDto;
-	}
+	}*/
 
 	@Override
 	public int compareTo(EmployeeDto o) {

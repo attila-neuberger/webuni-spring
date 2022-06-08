@@ -16,6 +16,10 @@ import hu.webuni.hr.comtur.repository.EmployeeRepository;
 @Service
 public abstract class EmployeeService extends BaseService<Employee> implements IEmployeeService {
 	
+	public List<Employee> findBySalaryGreaterThan(int salaryThreshold) {
+		return ((EmployeeRepository)repository).findBySalaryGreaterThan(salaryThreshold);
+	}
+	
 	public List<Employee> findByPosition(String position) {
 		return ((EmployeeRepository)repository).findByPosition(position);
 	}
