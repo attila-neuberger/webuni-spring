@@ -52,7 +52,7 @@ public class HrRestEmployeeController {
 		if (employee == null) {
 			throw new EmployeeException(String.format("Employee with ID '%d' does not exist.", id));
 		}
-		return employeeMapper.employeeToDto(employee);
+		return employeeMapper.employeeToDtoWithNoCompany(employee);
 	}
 	
 	@PostMapping
@@ -61,7 +61,7 @@ public class HrRestEmployeeController {
 			throw new EmployeeException(String.format("Employee with ID '%d' already exists.", employeeDto.getId()));
 		}
 		Employee employee = employeeService.save(employeeMapper.dtoToEmployee(employeeDto));
-		return employeeMapper.employeeToDto(employee);
+		return employeeMapper.employeeToDtoWithNoCompany(employee);
 	}
 	
 	@PutMapping("/{id}")
@@ -71,7 +71,7 @@ public class HrRestEmployeeController {
 		}
 		employeeDto.setId(id);
 		Employee employee = employeeService.save(employeeMapper.dtoToEmployee(employeeDto));
-		return employeeMapper.employeeToDto(employee);
+		return employeeMapper.employeeToDtoWithNoCompany(employee);
 	}
 	
 	@DeleteMapping("/{id}")

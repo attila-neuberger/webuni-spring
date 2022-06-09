@@ -33,8 +33,8 @@ public interface CompanyMapper {
 	
 	/* ***** Mappings of nested objects: ***** */
 	
-	// @Mapping(target = "companyDto", source = "company")
 	@Mapping(target = "title", source = "position")
+	@Mapping(target = "companyDto", ignore = true)
 	EmployeeDto employeeToDto(Employee employee);
 	
 	List<EmployeeDto> employeesToDtos(List<Employee> employees);

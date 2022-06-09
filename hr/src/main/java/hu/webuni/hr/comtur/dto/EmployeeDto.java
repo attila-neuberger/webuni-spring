@@ -23,7 +23,7 @@ public class EmployeeDto implements IDtoKey, Comparable<EmployeeDto> {
 	@Past
 	private LocalDateTime startDate;
 	
-	// private CompanyDto companyDto;
+	private CompanyDto companyDto;
 	
 	public EmployeeDto() {}
 	
@@ -75,13 +75,13 @@ public class EmployeeDto implements IDtoKey, Comparable<EmployeeDto> {
 		this.startDate = startDate;
 	}
 
-	/*public CompanyDto getCompanyDto() {
+	public CompanyDto getCompanyDto() {
 		return companyDto;
 	}
 
 	public void setCompanyDto(CompanyDto companyDto) {
 		this.companyDto = companyDto;
-	}*/
+	}
 
 	@Override
 	public int compareTo(EmployeeDto o) {
