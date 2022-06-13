@@ -2,6 +2,8 @@ package hu.webuni.hr.comtur.dto;
 
 import java.util.Objects;
 
+import javax.validation.constraints.NotEmpty;
+
 import com.fasterxml.jackson.annotation.JsonView;
 
 import hu.webuni.hr.comtur.dto.Views.VisibleData;
@@ -13,6 +15,7 @@ public class PositionDto {
 	private long id;
 	
 	@JsonView(VisibleData.class)
+	@NotEmpty
 	private String name;
 	
 	@JsonView(VisibleData.class)

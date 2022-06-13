@@ -86,6 +86,17 @@ public class CompanyService extends BaseService<Company> {
 	}
 	
 	@Transactional
+	public void changeSalaryForPosition(String positionName, int minSalary) {
+		List<Employee> employees = employeeRepository.findByPositionName(positionName);
+		for (Employee employee : employees) {
+			employee.getPosition().setMinSalary(minSalary);
+			if (employee.getSalary() < minSalary) {
+				employee.setSalary(minSalary);
+			}
+		}
+	}
+	
+	@Transactional
 	public Company changeSalaryForPositionOfCompany(String positionName, int minSalary, long companyRegistrationNumber) {
 		Company company = ((CompanyRepository)repository).findByCompanyRegistrationNumber(companyRegistrationNumber);
 		if (company == null) {

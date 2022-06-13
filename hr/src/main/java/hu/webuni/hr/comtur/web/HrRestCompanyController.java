@@ -150,8 +150,14 @@ public class HrRestCompanyController {
 		}
 	}
 	
+	@GetMapping(params = {"positionName", "minSalary"})
+	public HttpStatus changeSalaryForPosition(@RequestParam String positionName, @RequestParam int minSalary) {
+		companyService.changeSalaryForPosition(positionName, minSalary);
+		return HttpStatus.ACCEPTED;
+	}
+	
 	@GetMapping(params = {"positionName", "minSalary", "companyRegistrationNumber"})
-	public ResponseEntity<CompanyDto> getCompanysAverageSalaries(@RequestParam String positionName, 
+	public ResponseEntity<CompanyDto> changeSalaryForPositionOfCompany(@RequestParam String positionName, 
 			@RequestParam int minSalary, @RequestParam long companyRegistrationNumber) {
 		try {
 			return ResponseEntity.ok(companyMapper.companyToDto(companyService.changeSalaryForPositionOfCompany(
