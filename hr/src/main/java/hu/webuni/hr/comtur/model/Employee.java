@@ -4,14 +4,13 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import hu.webuni.hr.comtur.dto.IDtoKey;
 
@@ -22,27 +21,48 @@ public class Employee implements IDtoKey, Comparable<Employee> {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 	
+	@Column(nullable = false)
 	private String name;
 	
-	private String position;
+	// private String position;
 	
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "position_id")
+	private Position position;
+	
+	@Column(nullable = false)
 	private int salary;
 	
+	@Column(nullable = false)
 	private LocalDateTime startDate;
 	
-	@ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+	@ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
 	@JoinColumn(name = "company_id")
-	@JsonIgnore
 	private Company company;
 	
 	public Employee() {}
 	
-	public Employee(long id, String name, String position, int salary, LocalDateTime startDate) {
+	public Employee(String name, Position position, int salary, LocalDateTime startDate) {
+		this.name = name;
+		this.position = position;
+		this.salary = salary;
+		this.startDate = startDate;
+	}
+	
+	public Employee(long id, String name, Position position, int salary, LocalDateTime startDate) {
 		this.id = id;
 		this.name = name;
 		this.position = position;
 		this.salary = salary;
 		this.startDate = startDate;
+	}
+	
+	public Employee(String name, Position position, int salary, LocalDateTime startDate, Company company) {
+		this.name = name;
+		this.position = position;
+		this.salary = salary;
+		this.startDate = startDate;
+		this.company = company;
 	}
 	
 	@Override
@@ -63,11 +83,11 @@ public class Employee implements IDtoKey, Comparable<Employee> {
 		this.name = name;
 	}
 	
-	public String getPosition() {
+	public Position getPosition() {
 		return position;
 	}
 	
-	public void setPosition(String position) {
+	public void setPosition(Position position) {
 		this.position = position;
 	}
 	
@@ -115,5 +135,11 @@ public class Employee implements IDtoKey, Comparable<Employee> {
 			return false;
 		Employee other = (Employee) obj;
 		return id == other.id;
+	}
+
+	@Override
+	public String toString() {
+		return "Employee [id=" + id + ", name=" + name + ", position=" + position + ", salary=" + salary
+				+ ", startDate=" + startDate + "]";
 	}
 }

@@ -1,12 +1,15 @@
 package hu.webuni.hr.comtur.dto;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
 import hu.webuni.hr.comtur.dto.Views.VisibleData;
+import hu.webuni.hr.comtur.model.CompanyType;
 
 public class CompanyDto implements IDtoKey {
 	
@@ -19,6 +22,12 @@ public class CompanyDto implements IDtoKey {
 	@JsonView(VisibleData.class)
 	private String name;
 	
+	/*@JsonView(VisibleData.class)
+	private CompanyType companyType;*/
+	
+	@JsonView(VisibleData.class)
+	private Set<CompanyType> companyTypes;
+	
 	@JsonView(VisibleData.class)
 	private String address;
 	
@@ -28,10 +37,14 @@ public class CompanyDto implements IDtoKey {
 		this.employees = new ArrayList<>();
 	}
 
-	public CompanyDto(long id, long companyRegistrationNumber, String name, String address, List<EmployeeDto> employees) {
+	public CompanyDto(long id, long companyRegistrationNumber, String name, CompanyType companyType, String address, 
+			List<EmployeeDto> employees) {
 		this.id = id;
 		this.companyRegistrationNumber = companyRegistrationNumber;
 		this.name = name;
+		// this.companyType = companyType;
+		this.companyTypes = new HashSet<>(1);
+		companyTypes.add(companyType);
 		this.address = address;
 		this.employees = employees == null ? new ArrayList<>() : employees;
 	}
@@ -62,6 +75,22 @@ public class CompanyDto implements IDtoKey {
 		this.name = name;
 	}
 	
+	/*public CompanyType getCompanyType() {
+		return companyType;
+	}
+
+	public void setCompanyType(CompanyType companyType) {
+		this.companyType = companyType;
+	}*/
+
+	public Set<CompanyType> getCompanyTypes() {
+		return companyTypes;
+	}
+
+	public void setCompanyTypes(Set<CompanyType> companyTypes) {
+		this.companyTypes = companyTypes;
+	}
+
 	public String getAddress() {
 		return address;
 	}

@@ -5,9 +5,11 @@ import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import hu.webuni.hr.comtur.model.Company;
 import hu.webuni.hr.comtur.model.Employee;
+import hu.webuni.hr.comtur.model.not_entity.CompanysAverageSalaries;
 import hu.webuni.hr.comtur.repository.CompanyRepository;
 import hu.webuni.hr.comtur.repository.EmployeeRepository;
 
@@ -30,6 +32,7 @@ public class CompanyService extends BaseService<Company> {
 		this.repository = companyRepository;
 	}
 	
+	@Transactional
 	public Company createEmployeeForCompany(long companyId, Employee employee) throws NoSuchElementException {
 		Company company = repository.findById(companyId).get();
 		company.addEmployee(employee);
@@ -38,6 +41,7 @@ public class CompanyService extends BaseService<Company> {
 		return company;
 	}
 	
+	@Transactional
 	public Company deleteEmployeeFromCompany(long companyId, long employeeId)  throws NoSuchElementException {
 		Company company = repository.findById(companyId).get();
 		Employee employee = employeeRepository.findById(employeeId).get();
@@ -51,6 +55,7 @@ public class CompanyService extends BaseService<Company> {
 		return company;
 	}
 	
+	@Transactional
 	public Company swapEmployeesOfCompany(List<Employee> employees, long companyId) {
 		Company company = repository.findById(companyId).get();
 		for (Employee employee : company.getEmployees()) {
@@ -60,6 +65,39 @@ public class CompanyService extends BaseService<Company> {
 		for (Employee employee : employees) {
 			company.addEmployee(employee);
 			employeeRepository.save(employee);
+		}
+		return company;
+	}
+	
+	public List<Company> getCompaniesWithHighSalaryEmployee(int salary) {
+		return ((CompanyRepository)repository).getCompaniesWithHighSalaryEmployee(salary);
+	}
+	
+	public List<Company> getCompaniesWithEmployeesMoreThan(long count) {
+		return ((CompanyRepository)repository).getCompaniesWithEmployeesMoreThan(count);
+	}
+	
+	public List<CompanysAverageSalaries> getCompanysAverageSalaries(long companyRegistrationNumber) throws NoSuchElementException {
+		Company company = ((CompanyRepository)repository).findByCompanyRegistrationNumber(companyRegistrationNumber);
+		if (company == null) {
+			throw new NoSuchElementException(String.format("Company with ID %d does not exist.", companyRegistrationNumber));
+		}
+		return ((CompanyRepository)repository).getCompanysAverageSalaries(companyRegistrationNumber);
+	}
+	
+	@Transactional
+	public Company changeSalaryForPositionOfCompany(String positionName, int minSalary, long companyRegistrationNumber) {
+		Company company = ((CompanyRepository)repository).findByCompanyRegistrationNumber(companyRegistrationNumber);
+		if (company == null) {
+			throw new NoSuchElementException(String.format("Company with ID %d does not exist.", companyRegistrationNumber));
+		}
+		for (Employee employee : company.getEmployees()) {
+			if (employee.getPosition() != null && positionName.equals(employee.getPosition().getName())) {
+				employee.getPosition().setMinSalary(minSalary);
+				if (employee.getSalary() < minSalary) {
+					employee.setSalary(minSalary);
+				}
+			}
 		}
 		return company;
 	}

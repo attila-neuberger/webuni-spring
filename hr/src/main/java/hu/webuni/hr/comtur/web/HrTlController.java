@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import hu.webuni.hr.comtur.model.Education;
 import hu.webuni.hr.comtur.model.Employee;
+import hu.webuni.hr.comtur.model.Position;
 
 /**
  * Thymeleaf controller.
@@ -23,10 +25,14 @@ public class HrTlController {
 	private List<Employee> employees = new ArrayList<>();
 	
 	{
-		employees.add(new Employee(1L, "Attila", "Vezérigazgató", 1900, LocalDateTime.of(2010, 1, 1, 0, 0)));
-		employees.add(new Employee(2L, "Edit", "HR-es", 1000, LocalDateTime.of(2018, 1, 1, 0, 0)));
-		employees.add(new Employee(3L, "Mici", "Takarító", 800, LocalDateTime.of(2022, 1, 1, 0, 0)));
-		employees.add(new Employee(4L, "Bandi", "Mindenes", 1234, LocalDateTime.of(2015, 1, 1, 0, 0)));
+		employees.add(new Employee(1L, "Attila", new Position("Vezérigazgató", Education.UNIVERSITY, 1500), 
+				1900, LocalDateTime.of(2010, 1, 1, 0, 0)));
+		employees.add(new Employee(2L, "Edit", new Position("HR-es", Education.COLLEGE, 888), 
+				1000, LocalDateTime.of(2018, 1, 1, 0, 0)));
+		employees.add(new Employee(3L, "Mici", new Position("Takarító", Education.NONE, 200), 
+				800, LocalDateTime.of(2022, 1, 1, 0, 0)));
+		employees.add(new Employee(4L, "Bandi", new Position("Mindenes", Education.NONE, 500), 
+				1234, LocalDateTime.of(2015, 1, 1, 0, 0)));
 	}
 	
 	@GetMapping("/")

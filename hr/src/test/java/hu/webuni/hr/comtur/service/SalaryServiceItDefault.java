@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import hu.webuni.hr.comtur.model.Education;
 import hu.webuni.hr.comtur.model.Employee;
+import hu.webuni.hr.comtur.model.Position;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -18,9 +20,12 @@ public class SalaryServiceItDefault {
 	@Autowired
 	SalaryService salaryService;
 	
-	Employee employee1 = new Employee(1L, "Name", "Position", 1000, LocalDateTime.of(2022, 1, 1, 0, 0));
-	Employee employee2 = new Employee(2L, "Name", "Position", 1000, LocalDateTime.of(2019, 1, 1, 0, 0));
-	Employee employee3 = new Employee(3L, "Name", "Position", 1000, LocalDateTime.of(2010, 1, 1, 0, 0));
+	Employee employee1 = new Employee(1L, "Name", new Position("Position", Education.NONE, 100), 
+			1000, LocalDateTime.of(2022, 1, 1, 0, 0));
+	Employee employee2 = new Employee(2L, "Name", new Position("Position", Education.NONE, 100), 
+			1000, LocalDateTime.of(2019, 1, 1, 0, 0));
+	Employee employee3 = new Employee(3L, "Name", new Position("Position", Education.NONE, 100), 
+			1000, LocalDateTime.of(2010, 1, 1, 0, 0));
 	
 	@Test
 	void testSetNewSalary() throws Exception {

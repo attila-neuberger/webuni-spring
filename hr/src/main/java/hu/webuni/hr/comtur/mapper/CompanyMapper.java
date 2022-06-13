@@ -34,13 +34,13 @@ public interface CompanyMapper {
 	/* ***** Mappings of nested objects: ***** */
 	
 	@Mapping(target = "title", source = "position")
-	@Mapping(target = "companyDto", ignore = true)
-	EmployeeDto employeeToDto(Employee employee);
-	
-	List<EmployeeDto> employeesToDtos(List<Employee> employees);
-
-	@InheritInverseConfiguration
 	@Mapping(target = "company", ignore = true)
+	EmployeeDto employeeToDtoWithNoCompany(Employee employee);
+
+	List<EmployeeDto> employeesToDtosWithNoCompany(List<Employee> employees);
+
+	@Mapping(target = "company", ignore = true)
+	@InheritInverseConfiguration
 	Employee dtoToEmployee(EmployeeDto employeeDto);
 	
 	List<Employee> dtosToEmployees(List<EmployeeDto> employeeDtos);

@@ -10,6 +10,7 @@ import java.util.Date;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,7 +21,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 import hu.webuni.hr.comtur.dto.EmployeeDto;
+import hu.webuni.hr.comtur.dto.Views;
 import hu.webuni.hr.comtur.mapper.EmployeeMapper;
 import hu.webuni.hr.comtur.model.Employee;
 import hu.webuni.hr.comtur.service.EmployeeService;
@@ -42,11 +46,13 @@ public class HrRestEmployeeController {
 	EmployeeMapper employeeMapper;
 	
 	@GetMapping
+	@JsonView(Views.VisibleData.class)
 	public Collection<EmployeeDto> getAll() {
-		return employeeMapper.employeesToDtos(employeeService.findAll());
+		return employeeMapper.employeesToDtosWithNoCompany(employeeService.findAll());
 	}
-
+	
 	@GetMapping("/{id}")
+	@JsonView(Views.VisibleData.class)
 	public EmployeeDto getById(@PathVariable long id) {
 		Employee employee = employeeService.findById(id).orElseThrow();
 		if (employee == null) {
@@ -86,14 +92,7 @@ public class HrRestEmployeeController {
 	@GetMapping(params = "salaryThreshold")
 	public Collection<EmployeeDto> getEmployeesAboveSalary(@RequestParam int salaryThreshold) {
 		System.out.println("Employee REST get with salary threshold: " + salaryThreshold);
-		/*Collection<EmployeeDto> result = new ArrayList<>();
-		for (Employee employee : employeeService.findAll()) {
-			if (employee.getSalary() >= salaryThreshold) {
-				result.add(employeeMapper.employeeToDto(employee));
-			}
-		}
-		return result;*/
-		return employeeMapper.employeesToDtos(employeeService.findBySalaryGreaterThan(salaryThreshold));
+		return employeeMapper.employeesToDtosWithNoCompany(employeeService.findBySalaryGreaterThan(salaryThreshold));
 	}
 	
 	@PostMapping("/raise")
@@ -102,15 +101,15 @@ public class HrRestEmployeeController {
 	}
 	
 	@GetMapping(params = "position")
-	public Collection<EmployeeDto> getEmployeesWithPosition(@RequestParam String position) {
+	public Collection<EmployeeDto> getEmployeesWithPosition(@RequestParam String position, Pageable pageable) {
 		System.out.println("Employee REST get position: " + position);
-		return employeeMapper.employeesToDtos(employeeService.findByPosition(position));
+		return employeeMapper.employeesToDtosWithNoCompany(employeeService.findByPosition(position, pageable));
 	}
 	
 	@GetMapping(params = "name")
 	public Collection<EmployeeDto> getEmployeesWithNameStartingWith(@RequestParam String name) {
 		System.out.println("Employee REST get name starting with (ignore case): " + name);
-		return employeeMapper.employeesToDtos(employeeService.findByNameStartingWith(name));
+		return employeeMapper.employeesToDtosWithNoCompany(employeeService.findByNameStartingWith(name));
 	}
 	
 	@GetMapping(params = {"startDateFrom", "startDateTo"})
@@ -119,6 +118,6 @@ public class HrRestEmployeeController {
 		DateFormat df = new SimpleDateFormat("yyyy.MM.dd. HH:mm:ss");
 		System.out.println("Employee REST get start date between: " + df.format(new Date(startDateFrom.toEpochSecond(ZoneOffset.UTC) * 1000))
 				+ " - " + df.format(new Date(startDateTo.toEpochSecond(ZoneOffset.UTC) * 1000)));
-		return employeeMapper.employeesToDtos(employeeService.findByStartDateBetween(startDateFrom, startDateTo));
+		return employeeMapper.employeesToDtosWithNoCompany(employeeService.findByStartDateBetween(startDateFrom, startDateTo));
 	}
 }

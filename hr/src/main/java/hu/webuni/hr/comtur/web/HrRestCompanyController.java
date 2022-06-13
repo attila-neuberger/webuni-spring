@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -26,6 +27,7 @@ import hu.webuni.hr.comtur.dto.EmployeeDto;
 import hu.webuni.hr.comtur.dto.Views;
 import hu.webuni.hr.comtur.mapper.CompanyMapper;
 import hu.webuni.hr.comtur.model.Company;
+import hu.webuni.hr.comtur.model.not_entity.CompanysAverageSalaries;
 import hu.webuni.hr.comtur.service.CompanyService;
 
 /**
@@ -46,12 +48,6 @@ public class HrRestCompanyController {
 	@GetMapping
 	@JsonView(Views.VisibleData.class)
 	public Collection<CompanyDto> getAll() {
-		/*Collection<CompanyDto> result = new ArrayList<>();
-		for (Company company : companyService.findAll()) {
-			result.add(new CompanyDto(company.getId(), company.getCompanyRegistrationNumber(), company.getName(),
-					company.getAddress(), null));
-		}
-		return result;*/ // Using mapper's without-mapping method.
 		return companyMapper.companiesToDtosWithNoEmployees(companyService.findAll());
 	}
 
@@ -65,8 +61,6 @@ public class HrRestCompanyController {
 	public ResponseEntity<CompanyDto> getById(@PathVariable long id) {
 		CompanyDto company = companyMapper.companyToDtoWithNoEmployees(companyService.findById(id).orElseThrow(() -> 
 				new ResponseStatusException(HttpStatus.NOT_FOUND)));
-		/*return ResponseEntity.ok(new CompanyDto(company.getId(), company.getCompanyRegistrationNumber(), company.getName(),
-				company.getAddress(), null));*/ // Using mapper's without-mapping method.
 		return ResponseEntity.ok(company);
 	}
 
@@ -107,18 +101,6 @@ public class HrRestCompanyController {
 	
 	@PostMapping("/{companyId}/add")
 	public ResponseEntity<CompanyDto> createEmployeeForCompany(@RequestBody EmployeeDto employeeDto, @PathVariable long companyId) {
-		/*if (!companyService.exists(companyId)) {
-			return ResponseEntity.notFound().build();
-		}
-		Company company = companyService.findById(companyId).orElseThrow();
-		if (company.getEmployees() == null) {
-			List<Employee> employeeList = new ArrayList<>(1);
-			employeeList.add(employee);
-			company.setEmployees(employeeList);
-		} else {
-			company.getEmployees().add(employee);
-		}
-		return ResponseEntity.ok(companyMapper.companyToDto(company));*/ // Service provides these functions.
 		try {
 			Company company = companyService.createEmployeeForCompany(companyId, companyMapper.dtoToEmployee(employeeDto));
 			return ResponseEntity.ok(companyMapper.companyToDto(company));
@@ -129,24 +111,6 @@ public class HrRestCompanyController {
 	
 	@DeleteMapping("/{companyId}/delete/{employeeId}")
 	public ResponseEntity<CompanyDto> deleteEmployeeFromCompany(@PathVariable long companyId, @PathVariable long employeeId) {
-		/*if (!companyService.exists(companyId)) {
-			return ResponseEntity.notFound().build();
-		}
-		Company company = companyService.findById(companyId).orElseThrow();
-		if (company.getEmployees() == null) {
-			return ResponseEntity.notFound().build();
-		}
-		boolean found = false;
-		for (int i = 0; i < company.getEmployees().size() && !found; ++i) {
-			if (company.getEmployees().get(i).getId() == employeeId) {
-				company.getEmployees().remove(i);
-				found = true;
-			}
-		}
-		if (!found) {
-			return ResponseEntity.notFound().build();
-		}
-		return ResponseEntity.ok(companyMapper.companyToDto(company));*/ // Service provides these functions.
 		try {
 			Company company = companyService.deleteEmployeeFromCompany(companyId, employeeId);
 			return ResponseEntity.ok(companyMapper.companyToDto(company));
@@ -157,15 +121,41 @@ public class HrRestCompanyController {
 	
 	@PutMapping("/{companyId}/swap")
 	public ResponseEntity<CompanyDto> swapEmployeesOfCompany(@RequestBody List<EmployeeDto> employeeDtos, @PathVariable long companyId) {
-		/*if (!companyService.exists(companyId)) {
-			return ResponseEntity.notFound().build();
-		}
-		Company company = companyService.findById(companyId).orElseThrow();
-		company.setEmployees(employees);
-		return ResponseEntity.ok(companyMapper.companyToDto(company));*/ // Service provides these functions.
 		try {
 			Company company = companyService.swapEmployeesOfCompany(companyMapper.dtosToEmployees(employeeDtos), companyId);
 			return ResponseEntity.ok(companyMapper.companyToDto(company));
+		} catch (NoSuchElementException e) {
+			return ResponseEntity.notFound().build();
+		}
+	}
+	
+	@GetMapping(params = "salaryThreshold")
+	public Collection<CompanyDto> getCompaniesWithHighSalaryEmployee(@RequestParam int salaryThreshold) {
+		// Listing employee details also (companiesToDtos).
+		return companyMapper.companiesToDtos(companyService.getCompaniesWithHighSalaryEmployee(salaryThreshold));
+	}
+	
+	@GetMapping(params = "employeeCountGreater")
+	public Collection<CompanyDto> getCompaniesWithEmployeesMoreThan(@RequestParam long employeeCountGreater) {
+		 // Listing employee details not happens (companiesToDtosWithNoEmployees).
+		return companyMapper.companiesToDtosWithNoEmployees(companyService.getCompaniesWithEmployeesMoreThan(employeeCountGreater));
+	}
+	
+	@GetMapping(params = "averageSalariesOfCompany")
+	public ResponseEntity<Collection<CompanysAverageSalaries>> getCompanysAverageSalaries(@RequestParam long averageSalariesOfCompany) {
+		try {
+			return ResponseEntity.ok(companyService.getCompanysAverageSalaries(averageSalariesOfCompany));
+		} catch (NoSuchElementException e) {
+			return ResponseEntity.notFound().build();
+		}
+	}
+	
+	@GetMapping(params = {"positionName", "minSalary", "companyRegistrationNumber"})
+	public ResponseEntity<CompanyDto> getCompanysAverageSalaries(@RequestParam String positionName, 
+			@RequestParam int minSalary, @RequestParam long companyRegistrationNumber) {
+		try {
+			return ResponseEntity.ok(companyMapper.companyToDto(companyService.changeSalaryForPositionOfCompany(
+					positionName, minSalary, companyRegistrationNumber)));
 		} catch (NoSuchElementException e) {
 			return ResponseEntity.notFound().build();
 		}

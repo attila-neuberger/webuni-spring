@@ -13,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import hu.webuni.hr.comtur.dto.EmployeeDto;
+import hu.webuni.hr.comtur.dto.PositionDto;
+import hu.webuni.hr.comtur.model.Education;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class EmployeeControllerIt {
@@ -25,7 +27,8 @@ public class EmployeeControllerIt {
 	@Test
 	void testThatCreatedEmployeeIsListed() throws Exception {
 		List<EmployeeDto> employeesBefore = getAllEmployees();
-		EmployeeDto employeeDto = new EmployeeDto(9L, "Name 9", "Position 9", 999, LocalDateTime.now());
+		EmployeeDto employeeDto = new EmployeeDto(9L, "Name 9", new PositionDto("Position 9", Education.NONE, 100), 
+				999, LocalDateTime.now());
 		createEmployee(employeeDto);
 		List<EmployeeDto> employeesAfter = getAllEmployees();
 		
@@ -73,10 +76,13 @@ public class EmployeeControllerIt {
 	@Test
 	void testThatCreatedEmployeeValidationFails() throws Exception {
 		List<EmployeeDto> employeesBefore = getAllEmployees();
-		EmployeeDto employeeWithEmptyName = new EmployeeDto(11L, "", "Position 11", 999, LocalDateTime.now());
-		EmployeeDto employeeWithEmptyPosition = new EmployeeDto(12L, "Name 12", "", 999, LocalDateTime.now());
-		EmployeeDto employeeWithNegativeSalary = new EmployeeDto(13L, "Name 13", "Position 13", -999, LocalDateTime.now());
-		EmployeeDto employeeWithFutureStartDate = new EmployeeDto(14L, "Name 14", "Position 14", 999, LocalDateTime.now().plusDays(1));
+		EmployeeDto employeeWithEmptyName = new EmployeeDto(11L, "", new PositionDto("Position 11", Education.NONE, 100), 
+				999, LocalDateTime.now());
+		EmployeeDto employeeWithEmptyPosition = new EmployeeDto(12L, "Name 12", null, 999, LocalDateTime.now());
+		EmployeeDto employeeWithNegativeSalary = new EmployeeDto(13L, "Name 13", 
+				new PositionDto("Position 13", Education.NONE, 100), -999, LocalDateTime.now());
+		EmployeeDto employeeWithFutureStartDate = new EmployeeDto(14L, "Name 14", 
+				new PositionDto("Position 14", Education.NONE, 100), 999, LocalDateTime.now().plusDays(1));
 		createInvalidEmployee(employeeWithEmptyName);
 		createInvalidEmployee(employeeWithEmptyPosition);
 		createInvalidEmployee(employeeWithNegativeSalary);
@@ -110,7 +116,10 @@ public class EmployeeControllerIt {
 			EmployeeDto employeeDtoSavedState = new EmployeeDto(employeeDto.getId(), 
 					employeeDto.getName(), employeeDto.getTitle(), employeeDto.getSalary(), employeeDto.getStartDate());
 			employeeDto.setName(employeeDto.getName() + " (modified)");
-			employeeDto.setTitle(employeeDto.getTitle() + " (modified)");
+			PositionDto modifiedPositionDto = new PositionDto(employeeDto.getTitle().getName() + " (modified)", 
+					employeeDto.getTitle().getMinEducation(), employeeDto.getTitle().getMinSalary());
+			modifiedPositionDto.setId(employeeDto.getTitle().getId());
+			employeeDto.setTitle(modifiedPositionDto);
 			employeeDto.setSalary(employeeDto.getSalary() + 1);
 			employeeDto.setStartDate(employeeDto.getStartDate().minusYears(1));
 			modifyEmployee(employeeDto);
@@ -124,7 +133,7 @@ public class EmployeeControllerIt {
 			assertThat(employeesAfter.get(0)).isEqualTo(employeeDto);
 			assertThat(employeesAfter.get(0).getId()).isEqualTo(employeeDtoSavedState.getId());
 			assertThat(employeesAfter.get(0).getName()).isEqualTo(employeeDtoSavedState.getName() + " (modified)");
-			assertThat(employeesAfter.get(0).getTitle()).isEqualTo(employeeDtoSavedState.getTitle() + " (modified)");
+			assertThat(employeesAfter.get(0).getTitle().getName()).isEqualTo(employeeDtoSavedState.getTitle().getName() + " (modified)");
 			assertThat(employeesAfter.get(0).getSalary()).isEqualTo(employeeDtoSavedState.getSalary() + 1);
 			assertThat(employeesAfter.get(0).getStartDate()).isEqualTo(employeeDtoSavedState.getStartDate().minusYears(1));
 		}
@@ -154,7 +163,7 @@ public class EmployeeControllerIt {
 			employeeDto.setName("");
 			modifyInvalidEmployee(employeeDto);
 			employeeDto.setName(employeeDtoSavedState.getName());
-			employeeDto.setTitle("");
+			employeeDto.setTitle(null);
 			modifyInvalidEmployee(employeeDto);
 			employeeDto.setTitle(employeeDtoSavedState.getTitle());
 			employeeDto.setSalary(-1);
