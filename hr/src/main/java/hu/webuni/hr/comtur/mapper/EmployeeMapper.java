@@ -17,6 +17,8 @@ import hu.webuni.hr.comtur.model.Position;
 public interface EmployeeMapper {
 	
 	@Mapping(target = "title", source = "position")
+	@Mapping(target = "company.employees", ignore = true)
+	@Mapping(target = "company.companyType", source = "company.companyType.name")
 	EmployeeDto employeeToDto(Employee employee);
 	
 	@Named("summary")
@@ -37,5 +39,6 @@ public interface EmployeeMapper {
 	
 	PositionDto positionToDto(Position position);
 	
+	@Mapping(target = "employees", ignore = true)
 	Position dtoToPosition(PositionDto positionDto);
 }

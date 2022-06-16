@@ -27,7 +27,7 @@ public class EmployeeControllerIt {
 	@Test
 	void testThatCreatedEmployeeIsListed() throws Exception {
 		List<EmployeeDto> employeesBefore = getAllEmployees();
-		EmployeeDto employeeDto = new EmployeeDto(9L, "Name 9", new PositionDto("Position 9", Education.NONE, 100), 
+		EmployeeDto employeeDto = new EmployeeDto(9L, "Name 9", new PositionDto("Position 9", Education.NONE), 
 				999, LocalDateTime.of(2018, 5, 7, 20, 50, 50));
 		createEmployee(employeeDto);
 		List<EmployeeDto> employeesAfter = getAllEmployees();
@@ -77,13 +77,13 @@ public class EmployeeControllerIt {
 	@Test
 	void testThatCreatedEmployeeValidationFails() throws Exception {
 		List<EmployeeDto> employeesBefore = getAllEmployees();
-		EmployeeDto employeeWithEmptyName = new EmployeeDto(11L, "", new PositionDto("Position 11", Education.NONE, 100), 
+		EmployeeDto employeeWithEmptyName = new EmployeeDto(11L, "", new PositionDto("Position 11", Education.NONE), 
 				999, LocalDateTime.now());
 		// EmployeeDto employeeWithEmptyPosition = new EmployeeDto(12L, "Name 12", null, 999, LocalDateTime.now());
 		EmployeeDto employeeWithNegativeSalary = new EmployeeDto(13L, "Name 13", 
-				new PositionDto("Position 13", Education.NONE, 100), -999, LocalDateTime.now());
+				new PositionDto("Position 13", Education.NONE), -999, LocalDateTime.now());
 		EmployeeDto employeeWithFutureStartDate = new EmployeeDto(14L, "Name 14", 
-				new PositionDto("Position 14", Education.NONE, 100), 999, LocalDateTime.now().plusDays(1));
+				new PositionDto("Position 14", Education.NONE), 999, LocalDateTime.now().plusDays(1));
 		createInvalidEmployee(employeeWithEmptyName);
 		// createInvalidEmployee(employeeWithEmptyPosition);
 		createInvalidEmployee(employeeWithNegativeSalary);
@@ -119,7 +119,7 @@ public class EmployeeControllerIt {
 					employeeDto.getName(), employeeDto.getTitle(), employeeDto.getSalary(), employeeDto.getStartDate());
 			employeeDto.setName(employeeDto.getName() + " (modified)");
 			PositionDto modifiedPositionDto = new PositionDto(employeeDto.getTitle().getName() + " (modified)", 
-					employeeDto.getTitle().getMinEducation(), employeeDto.getTitle().getMinSalary());
+					employeeDto.getTitle().getMinEducation());
 			modifiedPositionDto.setId(employeeDto.getTitle().getId());
 			employeeDto.setTitle(modifiedPositionDto);
 			employeeDto.setSalary(employeeDto.getSalary() + 1);
@@ -157,7 +157,7 @@ public class EmployeeControllerIt {
 	
 	@Test
 	void testThatModifiedEmployeeValidationFails() throws Exception {
-		createEmployee(new EmployeeDto(123L, "Invalid test", new PositionDto("Position of invalid", Education.NONE, 100), 
+		createEmployee(new EmployeeDto(123L, "Invalid test", new PositionDto("Position of invalid", Education.NONE), 
 				1000, LocalDateTime.now()));
 		List<EmployeeDto> employeesBefore = getAllEmployees();
 		if (!employeesBefore.isEmpty()) {

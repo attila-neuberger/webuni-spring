@@ -50,4 +50,8 @@ public class BaseService<T extends IDtoKey> {
 	public boolean exists(long id) {
 		return repository.existsById(id);
 	}
+
+	public JpaRepository<T, Long> getRepository() {
+		return repository;
+	}
 }

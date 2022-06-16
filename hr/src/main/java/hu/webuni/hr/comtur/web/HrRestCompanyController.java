@@ -150,18 +150,18 @@ public class HrRestCompanyController {
 		}
 	}
 	
-	@GetMapping(params = {"positionName", "minSalary"})
+	@GetMapping(value = "/changeSalary", params = {"positionName", "minSalary"})
 	public HttpStatus changeSalaryForPosition(@RequestParam String positionName, @RequestParam int minSalary) {
 		companyService.changeSalaryForPosition(positionName, minSalary);
 		return HttpStatus.ACCEPTED;
 	}
 	
-	@GetMapping(params = {"positionName", "minSalary", "companyRegistrationNumber"})
-	public ResponseEntity<CompanyDto> changeSalaryForPositionOfCompany(@RequestParam String positionName, 
-			@RequestParam int minSalary, @RequestParam long companyRegistrationNumber) {
+	@GetMapping(value = "/{companyId}/changeSalary", params = {"positionName", "minSalary"})
+	public ResponseEntity<CompanyDto> changeSalaryForPositionOfCompany(@PathVariable long companyId, 
+			@RequestParam String positionName, @RequestParam int minSalary) {
 		try {
 			return ResponseEntity.ok(companyMapper.companyToDto(companyService.changeSalaryForPositionOfCompany(
-					positionName, minSalary, companyRegistrationNumber)));
+					positionName, minSalary, companyId)));
 		} catch (NoSuchElementException e) {
 			return ResponseEntity.notFound().build();
 		}

@@ -21,15 +21,11 @@ public class PositionDto {
 	@JsonView(VisibleData.class)
 	private Education minEducation;
 	
-	@JsonView(VisibleData.class)
-	private int minSalary;
-	
 	public PositionDto() {}
 
-	public PositionDto(String name, Education minEducation, int minSalary) {
+	public PositionDto(String name, Education minEducation) {
 		this.name = name;
 		this.minEducation = minEducation;
-		this.minSalary = minSalary;
 	}
 
 	public long getId() {
@@ -54,14 +50,6 @@ public class PositionDto {
 
 	public void setMinEducation(Education minEducation) {
 		this.minEducation = minEducation;
-	}
-
-	public int getMinSalary() {
-		return minSalary;
-	}
-
-	public void setMinSalary(int minSalary) {
-		this.minSalary = minSalary;
 	}
 
 	@Override

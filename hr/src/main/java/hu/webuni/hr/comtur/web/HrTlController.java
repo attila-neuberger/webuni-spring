@@ -25,13 +25,13 @@ public class HrTlController {
 	private List<Employee> employees = new ArrayList<>();
 	
 	{
-		employees.add(new Employee(1L, "Attila", new Position("Vezérigazgató", Education.UNIVERSITY, 1500), 
+		employees.add(new Employee(1L, "Attila", new Position("Vezérigazgató", Education.UNIVERSITY), 
 				1900, LocalDateTime.of(2010, 1, 1, 0, 0)));
-		employees.add(new Employee(2L, "Edit", new Position("HR-es", Education.COLLEGE, 888), 
+		employees.add(new Employee(2L, "Edit", new Position("HR-es", Education.COLLEGE), 
 				1000, LocalDateTime.of(2018, 1, 1, 0, 0)));
-		employees.add(new Employee(3L, "Mici", new Position("Takarító", Education.NONE, 200), 
+		employees.add(new Employee(3L, "Mici", new Position("Takarító", Education.NONE), 
 				800, LocalDateTime.of(2022, 1, 1, 0, 0)));
-		employees.add(new Employee(4L, "Bandi", new Position("Mindenes", Education.NONE, 500), 
+		employees.add(new Employee(4L, "Bandi", new Position("Mindenes", Education.NONE), 
 				1234, LocalDateTime.of(2015, 1, 1, 0, 0)));
 	}
 	

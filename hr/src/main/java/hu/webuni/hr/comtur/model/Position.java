@@ -1,11 +1,13 @@
 package hu.webuni.hr.comtur.model;
 
+import java.util.List;
 import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 @Entity
 public class Position {
@@ -20,15 +22,14 @@ public class Position {
 	@Column(nullable = true)
 	private Education minEducation;
 	
-	@Column(nullable = false)
-	private int minSalary;
+	@OneToMany(mappedBy = "position")
+	private List<Employee> employees;
 	
 	public Position() {}
 
-	public Position(String name, Education minEducation, int minSalary) {
+	public Position(String name, Education minEducation) {
 		this.name = name;
 		this.minEducation = minEducation;
-		this.minSalary = minSalary;
 	}
 
 	public long getId() {
@@ -55,12 +56,12 @@ public class Position {
 		this.minEducation = minEducation;
 	}
 
-	public int getMinSalary() {
-		return minSalary;
+	public List<Employee> getEmployees() {
+		return employees;
 	}
 
-	public void setMinSalary(int minSalary) {
-		this.minSalary = minSalary;
+	public void setEmployees(List<Employee> employees) {
+		this.employees = employees;
 	}
 
 	@Override
@@ -82,7 +83,6 @@ public class Position {
 
 	@Override
 	public String toString() {
-		return "Position [id=" + id + ", name=" + name + ", minEducation=" + minEducation + ", minSalary=" + minSalary
-				+ "]";
+		return "Position [id=" + id + ", name=" + name + ", minEducation=" + minEducation + "]";
 	}
 }

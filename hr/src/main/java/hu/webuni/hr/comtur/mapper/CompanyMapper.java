@@ -10,23 +10,28 @@ import org.mapstruct.Named;
 
 import hu.webuni.hr.comtur.dto.CompanyDto;
 import hu.webuni.hr.comtur.dto.EmployeeDto;
+import hu.webuni.hr.comtur.dto.PositionDto;
 import hu.webuni.hr.comtur.model.Company;
 import hu.webuni.hr.comtur.model.Employee;
+import hu.webuni.hr.comtur.model.Position;
 
 @Mapper(componentModel = "spring")
 public interface CompanyMapper {
 
+	@Mapping(target = "companyType", source = "companyType.name")
 	CompanyDto companyToDto(Company company);
 	
 	List<CompanyDto> companiesToDtos(List<Company> companies);
 	
 	@Named("summary")
 	@Mapping(target = "employees", ignore = true)
+	@Mapping(target = "companyType", source = "companyType.name")
 	CompanyDto companyToDtoWithNoEmployees(Company company);
 
 	@IterableMapping(qualifiedByName = "summary")
 	List<CompanyDto> companiesToDtosWithNoEmployees(List<Company> companies);
 
+	@InheritInverseConfiguration(name = "companyToDto")
 	Company dtoToCompany(CompanyDto companyDto);
 	
 	List<Company> dtosToCompanies(List<CompanyDto> companyDtos);
@@ -44,4 +49,9 @@ public interface CompanyMapper {
 	Employee dtoToEmployee(EmployeeDto employeeDto);
 	
 	List<Employee> dtosToEmployees(List<EmployeeDto> employeeDtos);
+	
+	PositionDto positionToDto(Position position);
+	
+	@Mapping(target = "employees", ignore = true)
+	Position dtoToPosition(PositionDto positionDto);
 }

@@ -20,11 +20,11 @@ public class SalaryServiceItDefault {
 	@Autowired
 	SalaryService salaryService;
 	
-	Employee employee1 = new Employee(1L, "Name", new Position("Position", Education.NONE, 100), 
+	Employee employee1 = new Employee(1L, "Name", new Position("Position", Education.NONE), 
 			1000, LocalDateTime.of(2022, 1, 1, 0, 0));
-	Employee employee2 = new Employee(2L, "Name", new Position("Position", Education.NONE, 100), 
+	Employee employee2 = new Employee(2L, "Name", new Position("Position", Education.NONE), 
 			1000, LocalDateTime.of(2019, 1, 1, 0, 0));
-	Employee employee3 = new Employee(3L, "Name", new Position("Position", Education.NONE, 100), 
+	Employee employee3 = new Employee(3L, "Name", new Position("Position", Education.NONE), 
 			1000, LocalDateTime.of(2010, 1, 1, 0, 0));
 	
 	@Test

@@ -3,7 +3,6 @@ package hu.webuni.hr.comtur.model;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -26,7 +25,7 @@ public class Employee implements IDtoKey, Comparable<Employee> {
 	
 	// private String position;
 	
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	@JoinColumn(name = "position_id")
 	private Position position;
 	
@@ -36,7 +35,7 @@ public class Employee implements IDtoKey, Comparable<Employee> {
 	@Column(nullable = false)
 	private LocalDateTime startDate;
 	
-	@ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
+	@ManyToOne // (cascade = {CascadeType.MERGE, CascadeType.REFRESH})
 	@JoinColumn(name = "company_id")
 	private Company company;
 	

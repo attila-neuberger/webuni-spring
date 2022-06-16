@@ -1,15 +1,14 @@
 package hu.webuni.hr.comtur.dto;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
+
+import javax.persistence.ManyToOne;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
 import hu.webuni.hr.comtur.dto.Views.VisibleData;
-import hu.webuni.hr.comtur.model.CompanyType;
 
 public class CompanyDto implements IDtoKey {
 	
@@ -22,11 +21,9 @@ public class CompanyDto implements IDtoKey {
 	@JsonView(VisibleData.class)
 	private String name;
 	
-	/*@JsonView(VisibleData.class)
-	private CompanyType companyType;*/
-	
 	@JsonView(VisibleData.class)
-	private Set<CompanyType> companyTypes;
+	@ManyToOne
+	private String companyType;
 	
 	@JsonView(VisibleData.class)
 	private String address;
@@ -37,14 +34,12 @@ public class CompanyDto implements IDtoKey {
 		this.employees = new ArrayList<>();
 	}
 
-	public CompanyDto(long id, long companyRegistrationNumber, String name, CompanyType companyType, String address, 
+	public CompanyDto(long id, long companyRegistrationNumber, String name, String companyType, String address, 
 			List<EmployeeDto> employees) {
 		this.id = id;
 		this.companyRegistrationNumber = companyRegistrationNumber;
 		this.name = name;
-		// this.companyType = companyType;
-		this.companyTypes = new HashSet<>(1);
-		companyTypes.add(companyType);
+		this.companyType = companyType;
 		this.address = address;
 		this.employees = employees == null ? new ArrayList<>() : employees;
 	}
@@ -75,20 +70,12 @@ public class CompanyDto implements IDtoKey {
 		this.name = name;
 	}
 	
-	/*public CompanyType getCompanyType() {
+	public String getCompanyType() {
 		return companyType;
 	}
 
-	public void setCompanyType(CompanyType companyType) {
+	public void setCompanyType(String companyType) {
 		this.companyType = companyType;
-	}*/
-
-	public Set<CompanyType> getCompanyTypes() {
-		return companyTypes;
-	}
-
-	public void setCompanyTypes(Set<CompanyType> companyTypes) {
-		this.companyTypes = companyTypes;
 	}
 
 	public String getAddress() {

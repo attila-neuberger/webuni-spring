@@ -1,19 +1,15 @@
 package hu.webuni.hr.comtur.model;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import hu.webuni.hr.comtur.dto.IDtoKey;
@@ -31,16 +27,13 @@ public class Company implements IDtoKey {
 	@Column(nullable = false)
 	private String name;
 	
-	// private CompanyType companyType;
-	
-	@ElementCollection(targetClass = CompanyType.class, fetch = FetchType.EAGER)
-	@CollectionTable(name = "company_type")
-	Set<CompanyType> companyTypes;
+	@ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+	private CompanyType companyType;
 	
 	@Column(nullable = false)
 	private String address;
 	
-	@OneToMany(mappedBy = "company", cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+	@OneToMany(mappedBy = "company")
 	private List<Employee> employees;
 
 	public Company() {
@@ -50,9 +43,7 @@ public class Company implements IDtoKey {
 	public Company(long companyRegistrationNumber, String name, CompanyType companyType, String address) {
 		this.companyRegistrationNumber = companyRegistrationNumber;
 		this.name = name;
-		// this.companyType = companyType;
-		this.companyTypes = new HashSet<>(1);
-		companyTypes.add(companyType);
+		this.companyType = companyType;
 		this.address = address;
 		this.employees = new ArrayList<>();
 	}
@@ -62,9 +53,7 @@ public class Company implements IDtoKey {
 		this.id = id;
 		this.companyRegistrationNumber = companyRegistrationNumber;
 		this.name = name;
-		this.companyTypes = new HashSet<>(1);
-		companyTypes.add(companyType);
-		// this.companyType = companyType;
+		this.companyType = companyType;
 		this.address = address;
 		this.employees = employees == null ? new ArrayList<>() : employees;
 	}
@@ -95,26 +84,18 @@ public class Company implements IDtoKey {
 		this.name = name;
 	}
 	
-	/*public CompanyType getCompanyType() {
+	public CompanyType getCompanyType() {
 		return companyType;
 	}
 
 	public void setCompanyType(CompanyType companyType) {
 		this.companyType = companyType;
-	}*/
+	}
 
 	public String getAddress() {
 		return address;
 	}
 	
-	public Set<CompanyType> getCompanyTypes() {
-		return companyTypes;
-	}
-
-	public void setCompanyTypes(Set<CompanyType> companyTypes) {
-		this.companyTypes = companyTypes;
-	}
-
 	public void setAddress(String address) {
 		this.address = address;
 	}
@@ -154,10 +135,6 @@ public class Company implements IDtoKey {
 
 	@Override
 	public String toString() {
-		CompanyType companyType = null;
-		if (companyTypes.iterator().hasNext()) {
-			companyType = companyTypes.iterator().next();
-		}
 		return "Company [id=" + id + ", companyRegistrationNumber=" + companyRegistrationNumber + ", name=" + name
 				+ ", companyType=" + companyType + ", address=" + address + "]";
 	}

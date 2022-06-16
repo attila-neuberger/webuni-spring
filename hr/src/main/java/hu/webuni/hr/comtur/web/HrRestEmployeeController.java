@@ -11,6 +11,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -101,7 +102,8 @@ public class HrRestEmployeeController {
 	}
 	
 	@GetMapping(params = "position")
-	public Collection<EmployeeDto> getEmployeesWithPosition(@RequestParam String position, Pageable pageable) {
+	public Collection<EmployeeDto> getEmployeesWithPosition(@RequestParam String position, 
+			@PageableDefault(sort = {"name"}) Pageable pageable) {
 		System.out.println("Employee REST get position: " + position);
 		return employeeMapper.employeesToDtosWithNoCompany(employeeService.findByPosition(position, pageable));
 	}

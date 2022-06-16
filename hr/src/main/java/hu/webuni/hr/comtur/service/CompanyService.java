@@ -2,6 +2,7 @@ package hu.webuni.hr.comtur.service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,9 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import hu.webuni.hr.comtur.model.Company;
 import hu.webuni.hr.comtur.model.Employee;
+import hu.webuni.hr.comtur.model.PositionXCompany;
 import hu.webuni.hr.comtur.model.not_entity.CompanysAverageSalaries;
 import hu.webuni.hr.comtur.repository.CompanyRepository;
-import hu.webuni.hr.comtur.repository.EmployeeRepository;
+import hu.webuni.hr.comtur.repository.PositionXCompanyRepository;
 
 /**
  * Methods are inherited from {@link BaseService}.
@@ -22,10 +24,16 @@ import hu.webuni.hr.comtur.repository.EmployeeRepository;
 public class CompanyService extends BaseService<Company> {
 
 	/**
-	 * Additional repository for employees.
+	 * Service for employees.
 	 */
 	@Autowired
-	private EmployeeRepository employeeRepository;
+	private EmployeeService employeeService;
+	
+	/**
+	 * Additional repository for position_x_companies.
+	 */
+	@Autowired
+	private PositionXCompanyRepository positionXCompanyRepository;
 	
 	public CompanyService(CompanyRepository companyRepository) {
 		super();
@@ -35,8 +43,8 @@ public class CompanyService extends BaseService<Company> {
 	@Transactional
 	public Company createEmployeeForCompany(long companyId, Employee employee) throws NoSuchElementException {
 		Company company = repository.findById(companyId).get();
+		employeeService.save(employee); // Creating employee.
 		company.addEmployee(employee);
-		employeeRepository.save(employee); // Creating employee.
 		// Modifying company is unnecessary because employee contains companyId in DB.
 		return company;
 	}
@@ -44,13 +52,13 @@ public class CompanyService extends BaseService<Company> {
 	@Transactional
 	public Company deleteEmployeeFromCompany(long companyId, long employeeId)  throws NoSuchElementException {
 		Company company = repository.findById(companyId).get();
-		Employee employee = employeeRepository.findById(employeeId).get();
+		Employee employee = employeeService.findById(employeeId).get();
 		if (employee.getCompany() == null || employee.getCompany().getId() != companyId) {
 			throw new NoSuchElementException("The employee cannot be found in the company.");
 		}
 		employee.setCompany(null);
 		company.getEmployees().remove(employee);
-		employeeRepository.save(employee); // Updating employee.
+		employeeService.save(employee); // Updating employee.
 		// Modifying company is unnecessary because employee contains companyId in DB.
 		return company;
 	}
@@ -64,7 +72,7 @@ public class CompanyService extends BaseService<Company> {
 		company.getEmployees().clear();
 		for (Employee employee : employees) {
 			company.addEmployee(employee);
-			employeeRepository.save(employee);
+			employeeService.save(employee);
 		}
 		return company;
 	}
@@ -77,39 +85,56 @@ public class CompanyService extends BaseService<Company> {
 		return ((CompanyRepository)repository).getCompaniesWithEmployeesMoreThan(count);
 	}
 	
-	public List<CompanysAverageSalaries> getCompanysAverageSalaries(long companyRegistrationNumber) throws NoSuchElementException {
-		Company company = ((CompanyRepository)repository).findByCompanyRegistrationNumber(companyRegistrationNumber);
-		if (company == null) {
-			throw new NoSuchElementException(String.format("Company with ID %d does not exist.", companyRegistrationNumber));
+	public List<CompanysAverageSalaries> getCompanysAverageSalaries(long id) throws NoSuchElementException {
+		Optional<Company> company = ((CompanyRepository)repository).findById(id);
+		if (!company.isPresent()) {
+			throw new NoSuchElementException(String.format("Company with ID %d does not exist.", id));
 		}
-		return ((CompanyRepository)repository).getCompanysAverageSalaries(companyRegistrationNumber);
+		return ((CompanyRepository)repository).getCompanysAverageSalaries(id);
 	}
 	
 	@Transactional
 	public void changeSalaryForPosition(String positionName, int minSalary) {
-		List<Employee> employees = employeeRepository.findByPositionName(positionName);
+		List<PositionXCompany> positionXCompanies = positionXCompanyRepository.findByPositionName(positionName);
+		for (PositionXCompany positionXCompany : positionXCompanies) {
+			positionXCompany.setMinSalary(minSalary);
+		}
+		/*List<Employee> employees = employeeRepository.findByPositionName(positionName);
 		for (Employee employee : employees) {
-			employee.getPosition().setMinSalary(minSalary);
 			if (employee.getSalary() < minSalary) {
 				employee.setSalary(minSalary);
 			}
-		}
+		}*/
+		
+		// 1 update instead of employees.size() update.
+		employeeService.getRepository().changeSalaries(positionName, minSalary);
 	}
 	
 	@Transactional
-	public Company changeSalaryForPositionOfCompany(String positionName, int minSalary, long companyRegistrationNumber) {
-		Company company = ((CompanyRepository)repository).findByCompanyRegistrationNumber(companyRegistrationNumber);
-		if (company == null) {
-			throw new NoSuchElementException(String.format("Company with ID %d does not exist.", companyRegistrationNumber));
+	public Company changeSalaryForPositionOfCompany(String positionName, int minSalary, long companyId) {
+		Optional<PositionXCompany> positionXCompany = positionXCompanyRepository.findByPositionNameAndCompanyId(positionName, companyId);
+		if (!positionXCompany.isPresent()) {
+			throw new NoSuchElementException(String.format("Position with name '%s' in company with ID %d does not exist.", 
+					positionName, companyId));
 		}
-		for (Employee employee : company.getEmployees()) {
-			if (employee.getPosition() != null && positionName.equals(employee.getPosition().getName())) {
-				employee.getPosition().setMinSalary(minSalary);
-				if (employee.getSalary() < minSalary) {
-					employee.setSalary(minSalary);
-				}
+		positionXCompany.get().setMinSalary(minSalary);
+		/*for (Employee employee : positionXCompany.get().getCompany().getEmployees()) {
+			if (positionName.equals(employee.getPosition().getName()) && employee.getSalary() < minSalary) {
+				employee.setSalary(minSalary);
 			}
+		}*/
+		
+		// 1 update instead of positionXCompany.get().getCompany().getEmployees().size() update.
+		employeeService.getRepository().changeSalaries(positionName, minSalary, companyId);
+		return positionXCompany.get().getCompany();
+	}
+
+	@Override
+	public Company save(Company company) {
+		for (Employee employee : company.getEmployees()) {
+			employee.setCompany(company);
 		}
-		return company;
+		employeeService.saveAll(company.getEmployees());
+		return super.save(company);
 	}
 }

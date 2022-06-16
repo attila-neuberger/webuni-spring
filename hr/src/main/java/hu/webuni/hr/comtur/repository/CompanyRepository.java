@@ -10,8 +10,6 @@ import hu.webuni.hr.comtur.model.not_entity.CompanysAverageSalaries;
 
 public interface CompanyRepository extends JpaRepository<Company, Long> {
 
-	Company findByCompanyRegistrationNumber(long companyRegistrationNumber);
-	
 	@Query(
 			"SELECT DISTINCT e.company " +
 			"FROM Employee e " +
@@ -26,17 +24,12 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 			"HAVING COUNT(e.id) > :count")
 	List<Company> getCompaniesWithEmployeesMoreThan(long count);
 	
-	/**
-	 * Average salary of company based on COMPANY REGISTRATION NUMBER, group by positions.
-	 * @param companyRegistrationNumber Value of company registration number.
-	 * @return Result of the query.
-	 */
 	@Query(
 			"SELECT NEW hu.webuni.hr.comtur.model.not_entity.CompanysAverageSalaries(e.position.name, AVG(e.salary)) " +
 			"FROM Employee e " +
 				"JOIN e.company c " +
-			"WHERE c.companyRegistrationNumber = :companyRegistrationNumber " +
+			"WHERE c.id = :id " +
 			"GROUP BY e.position.name " +
 			"ORDER BY 2 DESC")
-	List<CompanysAverageSalaries> getCompanysAverageSalaries(long companyRegistrationNumber);
+	List<CompanysAverageSalaries> getCompanysAverageSalaries(long id);
 }

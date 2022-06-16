@@ -28,13 +28,13 @@ public class HrApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		Employee employee1 = new Employee(1L, "Name1", new Position("Position1", Education.NONE, 500), 1000,
+		Employee employee1 = new Employee(1L, "Name1", new Position("Position1", Education.NONE), 1000,
 				LocalDateTime.of(2010, 1, 1, 0, 0));
-		Employee employee2 = new Employee(2L, "Name2", new Position("Position2", Education.GRADUATION, 800), 1000,
+		Employee employee2 = new Employee(2L, "Name2", new Position("Position2", Education.GRADUATION), 1000,
 				LocalDateTime.of(2018, 1, 1, 0, 0));
-		Employee employee3 = new Employee(3L, "Name3", new Position("Position3", Education.GRADUATION, 800), 1000,
+		Employee employee3 = new Employee(3L, "Name3", new Position("Position3", Education.GRADUATION), 1000,
 				LocalDateTime.of(2022, 1, 1, 0, 0));
-		Employee employee4 = new Employee(4L, "Name4", new Position("Position4", Education.UNIVERSITY, 1200), 1234,
+		Employee employee4 = new Employee(4L, "Name4", new Position("Position4", Education.UNIVERSITY), 1234,
 				LocalDateTime.of(2015, 1, 1, 0, 0));
 		raiseSalary(employee1);
 		raiseSalary(employee2);
