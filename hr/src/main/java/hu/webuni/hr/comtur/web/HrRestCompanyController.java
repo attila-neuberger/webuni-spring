@@ -53,8 +53,7 @@ public class HrRestCompanyController {
 
 	@GetMapping(params = "full=true")
 	public Collection<CompanyDto> getAllWithEmployees() {
-		// return companyMapper.companiesToDtos(companyService.findAll());
-		return companyMapper.companiesToDtos(companyService.getAllWithEmployees()); // Open-in-view fetched join.
+		return companyMapper.companiesToDtos(companyService.getCompaniesWithEmployees());
 	}
 	
 	@GetMapping("/{id}")
@@ -63,41 +62,66 @@ public class HrRestCompanyController {
 		CompanyDto company = companyMapper.companyToDtoWithNoEmployees(companyService.findById(id).orElseThrow(() -> 
 				new ResponseStatusException(HttpStatus.NOT_FOUND)));
 		return ResponseEntity.ok(company);
+		
 	}
 
 	@GetMapping(value = "/{id}", params = "full=true")
 	public ResponseEntity<CompanyDto> getByIdWithEmployees(@PathVariable long id) {
-		CompanyDto company = companyMapper.companyToDto(companyService.findById(id).orElseThrow(() -> 
+		CompanyDto company = companyMapper.companyToDto(companyService.getCompanyWithEmployees(id).orElseThrow(() -> 
 				new ResponseStatusException(HttpStatus.NOT_FOUND)));
 		return ResponseEntity.ok(company);
 	}
 	
 	@PostMapping
 	public ResponseEntity<CompanyDto> create(@RequestBody @Valid CompanyDto companyDto) {
-		if (companyService.exists(companyDto.getId())) {
+		/*if (companyService.exists(companyDto.getId())) {
 			return ResponseEntity.unprocessableEntity().build();
 		}
 		Company company = companyService.save(companyMapper.dtoToCompany(companyDto));
-		return ResponseEntity.ok(companyMapper.companyToDto(company));
+		return ResponseEntity.ok(companyMapper.companyToDto(company));*/
+		
+		// One transactional service call:
+		try {
+			Company company = companyService.create(companyMapper.dtoToCompany(companyDto));
+			return ResponseEntity.ok(companyMapper.companyToDto(company));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.unprocessableEntity().build();
+		}
 	}
 	
 	@PutMapping("/{id}")
 	public ResponseEntity<CompanyDto> modify(@PathVariable long id, @RequestBody @Valid CompanyDto companyDto) {
-		if (!companyService.exists(id)) {
+		/*if (!companyService.exists(id)) {
 			return ResponseEntity.notFound().build();
 		}
 		companyDto.setId(id);
 		Company company = companyService.save(companyMapper.dtoToCompany(companyDto));
-		return ResponseEntity.ok(companyMapper.companyToDto(company));
+		return ResponseEntity.ok(companyMapper.companyToDto(company));*/
+		
+		// One transactional service call:
+		try {
+			Company company = companyService.modify(id, companyMapper.dtoToCompany(companyDto));
+			return ResponseEntity.ok(companyMapper.companyToDto(companyService.getCompanyWithEmployees(company.getId()).get()));
+		} catch (NoSuchElementException e) {
+			return ResponseEntity.notFound().build();
+		}
 	}
 	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<CompanyDto> remove(@PathVariable long id) {
-		if (companyService.exists(id)) {
+		/*if (companyService.exists(id)) {
 			companyService.delete(id);
 			return ResponseEntity.accepted().build();
 		}
-		return ResponseEntity.notFound().build();
+		return ResponseEntity.notFound().build();*/
+		
+		// One transactional service call:
+		try {
+			companyService.remove(id);
+			return ResponseEntity.accepted().build();
+		} catch (NoSuchElementException e) {
+			return ResponseEntity.notFound().build();
+		}
 	}
 	
 	@PostMapping("/{companyId}/add")

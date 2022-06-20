@@ -130,6 +130,7 @@ public class CompanyService extends BaseService<Company> {
 	}
 
 	@Override
+	@Transactional
 	public Company save(Company company) {
 		for (Employee employee : company.getEmployees()) {
 			employee.setCompany(company);
@@ -138,7 +139,39 @@ public class CompanyService extends BaseService<Company> {
 		return super.save(company);
 	}
 	
-	public List<Company> getAllWithEmployees() {
-		return ((CompanyRepository)repository).getAllWithEmployees();
+	public List<Company> getCompaniesWithEmployees() {
+		return ((CompanyRepository)repository).getCompaniesWithEmployees();
+	}
+	
+	public Optional<Company> getCompanyWithEmployees(long id) {
+		return ((CompanyRepository)repository).getCompanyWithEmployees(id);
+	}
+	
+	@Transactional
+	public Company create(Company company) throws IllegalArgumentException {
+		if (exists(company.getId())) {
+			throw new IllegalArgumentException(String.format("Entity with ID %d already exists.", company.getId()));
+		}
+		return save(company);
+	}
+	
+	@Transactional
+	public Company modify(long id, Company company) throws NoSuchElementException {
+		if (!exists(id)) {
+			throw new NoSuchElementException(String.format("Entity with ID %d does not exist.", id));
+		}
+		company.setId(id);
+		return save(company);
+	}
+	
+	@Transactional
+	public void remove(long id) throws NoSuchElementException {
+		if (exists(id)) {
+			employeeService.getRepository().removeCompanyWithId(id);
+			positionXCompanyRepository.deleteOfCompany(id);
+			delete(id);
+		} else {
+			throw new NoSuchElementException(String.format("Entity with ID %d does not exist.", id));
+		}
 	}
 }

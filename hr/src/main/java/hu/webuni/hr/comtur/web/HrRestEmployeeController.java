@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.validation.Valid;
 
@@ -64,28 +66,51 @@ public class HrRestEmployeeController {
 	
 	@PostMapping
 	public EmployeeDto create(@RequestBody @Valid EmployeeDto employeeDto) {
-		if (employeeService.exists(employeeDto.getId())) {
+		/*if (employeeService.exists(employeeDto.getId())) {
 			throw new EmployeeException(String.format("Employee with ID '%d' already exists.", employeeDto.getId()));
 		}
 		Employee employee = employeeService.save(employeeMapper.dtoToEmployee(employeeDto));
-		return employeeMapper.employeeToDtoWithNoCompany(employee);
+		return employeeMapper.employeeToDtoWithNoCompany(employee);*/
+		
+		// One transactional service call:
+		try {
+			Employee employee = employeeService.create(employeeMapper.dtoToEmployee(employeeDto));
+			return employeeMapper.employeeToDto(employee);
+		} catch (IllegalArgumentException e) {
+			throw new EmployeeException(String.format("Employee with ID '%d' already exists.", employeeDto.getId()));
+		}
 	}
 	
 	@PutMapping("/{id}")
 	public EmployeeDto modify(@PathVariable long id, @RequestBody @Valid EmployeeDto employeeDto) {
-		if (!employeeService.exists(id)) {
+		/*if (!employeeService.exists(id)) {
 			throw new EmployeeException(String.format("Employee with ID '%d' does not exist.", id));
 		}
 		employeeDto.setId(id);
 		Employee employee = employeeService.save(employeeMapper.dtoToEmployee(employeeDto));
-		return employeeMapper.employeeToDtoWithNoCompany(employee);
+		return employeeMapper.employeeToDtoWithNoCompany(employee);*/
+		
+		// One transactional service call:
+		try {
+			Employee employee = employeeService.modify(id, employeeMapper.dtoToEmployee(employeeDto));
+			return employeeMapper.employeeToDtoWithNoCompany(employee);
+		} catch (NoSuchElementException e) {
+			throw new EmployeeException(String.format("Employee with ID '%d' does not exist.", id));
+		}
 	}
 	
 	@DeleteMapping("/{id}")
 	public void remove(@PathVariable long id) {
-		if (employeeService.exists(id)) {
+		/*if (employeeService.exists(id)) {
 			employeeService.delete(id);
 		} else {
+			throw new EmployeeException(String.format("Employee with ID '%d' does not exist.", id));
+		}*/
+		
+		// One transactional service call:
+		try {
+			employeeService.remove(id);
+		} catch (NoSuchElementException e) {
 			throw new EmployeeException(String.format("Employee with ID '%d' does not exist.", id));
 		}
 	}
@@ -121,5 +146,12 @@ public class HrRestEmployeeController {
 		System.out.println("Employee REST get start date between: " + df.format(new Date(startDateFrom.toEpochSecond(ZoneOffset.UTC) * 1000))
 				+ " - " + df.format(new Date(startDateTo.toEpochSecond(ZoneOffset.UTC) * 1000)));
 		return employeeMapper.employeesToDtosWithNoCompany(employeeService.findByStartDateBetween(startDateFrom, startDateTo));
+	}
+	
+	@PostMapping("/find")
+	@JsonView(Views.VisibleData.class)
+	public Collection<EmployeeDto> findEmployeesByExample(@RequestBody EmployeeDto employeeDto) {
+		List<Employee> employees = employeeService.findEmployeesByExample(employeeMapper.dtoToEmployee(employeeDto));
+		return employeeMapper.employeesToDtosWithNoCompany(employees);
 	}
 }
