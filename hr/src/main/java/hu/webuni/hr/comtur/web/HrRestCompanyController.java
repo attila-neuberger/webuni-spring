@@ -53,7 +53,8 @@ public class HrRestCompanyController {
 
 	@GetMapping(params = "full=true")
 	public Collection<CompanyDto> getAllWithEmployees() {
-		return companyMapper.companiesToDtos(companyService.findAll());
+		// return companyMapper.companiesToDtos(companyService.findAll());
+		return companyMapper.companiesToDtos(companyService.getAllWithEmployees()); // Open-in-view fetched join.
 	}
 	
 	@GetMapping("/{id}")

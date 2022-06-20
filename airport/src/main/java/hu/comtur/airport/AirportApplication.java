@@ -14,6 +14,7 @@ public class AirportApplication implements CommandLineRunner {
 	@Autowired
 	private PriceService priceService;
 	
+	@SuppressWarnings("unused")
 	@Autowired
 	private AirportService airportService;
 	
@@ -25,12 +26,6 @@ public class AirportApplication implements CommandLineRunner {
 	public void run(String... args) throws Exception {
 		System.out.println(priceService.getFinalPrice(200));
 		System.out.println(priceService.getFinalPrice(20_000));
-		airportService.createFlight();
+		// airportService.createFlight();
 	}
-
-	/*@Bean
-	public DiscountService discountService() {
-		// return new DefaultDiscountService();
-		return new SpecialDiscountService();
-	}*/
 }

@@ -23,6 +23,7 @@
 		<java.version>17</java.version>
 		<org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
 		<org.springdoc.version>1.5.6</org.springdoc.version>
+		<org.hibernatemodelgen.version>5.4.30.Final</org.hibernatemodelgen.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -84,7 +85,13 @@
         	<groupId>org.postgresql</groupId>
         	<artifactId>postgresql</artifactId>
         	<scope>runtime</scope>
-      </dependency>
+      	</dependency>
+      	
+		<dependency>
+		    <groupId>com.h2database</groupId>
+		    <artifactId>h2</artifactId>
+		    <scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -105,7 +112,11 @@
 	                        <artifactId>mapstruct-processor</artifactId>
 	                        <version>${org.mapstruct.version}</version>
 	                    </path>
-	                    <!-- other annotation processors -->
+	                    <path>
+	                        <groupId>org.hibernate</groupId>
+	                        <artifactId>hibernate-jpamodelgen</artifactId>
+	                        <version>${org.hibernatemodelgen.version}</version>
+	                    </path>
 	                </annotationProcessorPaths>
 	            </configuration>
 	        </plugin>

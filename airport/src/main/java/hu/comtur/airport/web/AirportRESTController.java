@@ -22,6 +22,7 @@ import hu.comtur.airport.dto.AirportDto;
 import hu.comtur.airport.mapper.AirportMapper;
 import hu.comtur.airport.model.Airport;
 import hu.comtur.airport.service.AirportService;
+import hu.comtur.airport.service.LogEntryService;
 
 @RestController
 @RequestMapping("/api/airports")
@@ -32,6 +33,9 @@ public class AirportRESTController {
 	
 	@Autowired
 	AirportMapper airportMapper;
+	
+	@Autowired
+	LogEntryService logEntryService;
 	
 	@GetMapping
 	public List<AirportDto> getAll() {
@@ -62,6 +66,7 @@ public class AirportRESTController {
 		airport.setId(id);
 		try {
 			AirportDto savedAirportDta = airportMapper.airportToDto(airportService.update(airport));
+			// logEntryService.createLog("Airport modified with ID " + id); // Responsibility of airportService.
 			return ResponseEntity.ok(savedAirportDta);
 		} catch (NoSuchElementException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);

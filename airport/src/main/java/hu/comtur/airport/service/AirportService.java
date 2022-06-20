@@ -5,12 +5,16 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+
 /*import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;*/
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import hu.comtur.airport.model.Airport;
 import hu.comtur.airport.model.Flight;
@@ -32,11 +36,14 @@ public class AirportService {
 	
 	private AirportRepository airportRepository;
 	private FlightRepository flightRepository;
+	private LogEntryService logEntryService;
 	
 	// Injecting via constructor.
-	public AirportService(AirportRepository airportRepository, FlightRepository flightRepository) {
+	public AirportService(AirportRepository airportRepository, FlightRepository flightRepository,
+			LogEntryService logEntryService) {
 		this.airportRepository = airportRepository;
 		this.flightRepository = flightRepository;
+		this.logEntryService = logEntryService;
 	}
 
 	@Transactional
@@ -101,19 +108,48 @@ public class AirportService {
 		checkUniqueIata(airport.getIata(), airport.getId());
 		// return em.merge(airport); // Using Spring Data instead of Entity manager.
 		if (airportRepository.existsById(airport.getId())) {
-			return airportRepository.save(airport);
+			Airport savedAirport = airportRepository.save(airport);
+			logEntryService.createLog(String.format("Airport modified with ID %d, new name: %s.", 
+					airport.getId(), airport.getName()));
+			return savedAirport;
 		} else {
 			throw new NoSuchElementException();
 		}
 	}
 	
 	@Transactional
-	public void createFlight() {
+	public Flight createFlight(String flightNumber, long takeOffAirportId, long landingAirportId, LocalDateTime takeOffTime) {
 		Flight flight = new Flight();
-		flight.setFlightNumber("F1234");
-		flight.setTakeOff(airportRepository.findById(2L).get());
-		flight.setLanding(airportRepository.findById(4L).get());
-		flight.setTakeOffTime(LocalDateTime.of(2022, 05, 8, 8, 45, 0));
-		flightRepository.save(flight);
+		flight.setFlightNumber(flightNumber);
+		flight.setTakeOff(airportRepository.findById(takeOffAirportId).get());
+		flight.setLanding(airportRepository.findById(landingAirportId).get());
+		flight.setTakeOffTime(takeOffTime);
+		return flightRepository.save(flight);
+	}
+	
+	public List<Flight> findFlightsByExample(Flight example) {
+		long id = example.getId();
+		String flightNumber = example.getFlightNumber();
+		String takeOffIata = null;
+		Airport takeOff = example.getTakeOff();
+		if (takeOff != null) {
+			takeOffIata = takeOff.getIata();
+		}
+		LocalDateTime takeOffTime = example.getTakeOffTime();
+		
+		Specification<Flight> specification = Specification.where(null);
+		if (id > 0) {
+			specification = specification.and(FlightSpecifications.hasId(id));
+		}
+		if (StringUtils.hasText(flightNumber)) {
+			specification = specification.and(FlightSpecifications.hasFlightNumber(flightNumber));
+		}
+		if (StringUtils.hasText(takeOffIata)) {
+			specification = specification.and(FlightSpecifications.hasTakeOffIata(takeOffIata));
+		}
+		if (takeOffTime != null) {
+			specification = specification.and(FlightSpecifications.hasTakeOffTime(takeOffTime));
+		}
+		return flightRepository.findAll(specification, Sort.by("id"));
 	}
 }

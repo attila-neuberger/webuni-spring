@@ -10,11 +10,20 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 
 import hu.webuni.hr.comtur.dto.IDtoKey;
 
 @Entity
+@NamedEntityGraph(
+	name = "Company.full",
+	attributeNodes = {
+		@NamedAttributeNode("employees"),
+		@NamedAttributeNode("companyType")
+	}
+)
 public class Company implements IDtoKey {
 
 	@Id

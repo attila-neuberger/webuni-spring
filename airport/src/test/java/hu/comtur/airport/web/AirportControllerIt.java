@@ -20,11 +20,11 @@ public class AirportControllerIt {
 	
 	@Autowired
 	WebTestClient webTestClient;
-
+	
 	@Test
 	void testThatCreatedAirportIsListed() throws Exception {
 		List<AirportDto> airportsBefore = getAllAirports();
-		AirportDto airportDto = new AirportDto(8L, "Gatwick Airport", "GTW");
+		AirportDto airportDto = new AirportDto(8L, "Gatwick Airport", "GAT");
 		createAirport(airportDto);
 		List<AirportDto> airportsAfter = getAllAirports();
 		
@@ -33,6 +33,7 @@ public class AirportControllerIt {
 				.containsExactlyElementsOf(airportsBefore);
 		assertThat(airportsAfter.get(airportsAfter.size() - 1))
 				.usingRecursiveComparison()
+				.ignoringFields("id")
 				.isEqualTo(airportDto);
 	}
 

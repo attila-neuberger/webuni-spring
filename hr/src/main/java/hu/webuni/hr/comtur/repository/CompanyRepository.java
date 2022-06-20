@@ -2,6 +2,7 @@ package hu.webuni.hr.comtur.repository;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -32,4 +33,13 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 			"GROUP BY e.position.name " +
 			"ORDER BY 2 DESC")
 	List<CompanysAverageSalaries> getCompanysAverageSalaries(long id);
+	
+	/*@Query(
+			"SELECT DISTINCT c " + 
+			"FROM Company c " + 
+				"LEFT JOIN FETCH c.employees")*/ // Fetch join example.
+	@Query("SELECT c FROM Company c") // Entity graph example.
+	@EntityGraph(attributePaths = {"employees", "companyType", "employees.position"}) // Entity graph example for attributes.
+	// @EntityGraph("Company.full") // Entity graph example for named graph, see Company class's annotation.
+	List<Company> getAllWithEmployees();
 }

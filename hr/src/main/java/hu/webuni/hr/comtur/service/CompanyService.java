@@ -137,4 +137,8 @@ public class CompanyService extends BaseService<Company> {
 		employeeService.saveAll(company.getEmployees());
 		return super.save(company);
 	}
+	
+	public List<Company> getAllWithEmployees() {
+		return ((CompanyRepository)repository).getAllWithEmployees();
+	}
 }
