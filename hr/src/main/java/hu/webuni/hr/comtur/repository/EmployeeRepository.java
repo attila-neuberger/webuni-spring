@@ -2,9 +2,11 @@ package hu.webuni.hr.comtur.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -69,4 +71,17 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSp
 				"WHERE e2.company.id = :companyId " + 
 			")")
 	int removeCompanyWithId(long companyId);
+	
+	@Query(
+			"SELECT e " + 
+			"FROM Employee e")
+	@EntityGraph(attributePaths = {"position", "company", "company.companyType"})
+	List<Employee> getEmployeesWithCompany();
+	
+	@Query(
+			"SELECT e " + 
+			"FROM Employee e " + 
+			"WHERE e.id = :id")
+	@EntityGraph(attributePaths = {"position", "company", "company.companyType"})
+	Optional<Employee> getEmployeeWithCompany(long id);
 }

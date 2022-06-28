@@ -42,16 +42,16 @@ public class CompanyService extends BaseService<Company> {
 	
 	@Transactional
 	public Company createEmployeeForCompany(long companyId, Employee employee) throws NoSuchElementException {
-		Company company = repository.findById(companyId).get();
-		employeeService.save(employee); // Creating employee.
+		Company company = getCompanyWithEmployees(companyId).get();
 		company.addEmployee(employee);
+		employeeService.save(employee); // Creating employee.
 		// Modifying company is unnecessary because employee contains companyId in DB.
 		return company;
 	}
 	
 	@Transactional
 	public Company deleteEmployeeFromCompany(long companyId, long employeeId)  throws NoSuchElementException {
-		Company company = repository.findById(companyId).get();
+		Company company = getCompanyWithEmployees(companyId).get();
 		Employee employee = employeeService.findById(employeeId).get();
 		if (employee.getCompany() == null || employee.getCompany().getId() != companyId) {
 			throw new NoSuchElementException("The employee cannot be found in the company.");
@@ -65,7 +65,7 @@ public class CompanyService extends BaseService<Company> {
 	
 	@Transactional
 	public Company swapEmployeesOfCompany(List<Employee> employees, long companyId) {
-		Company company = repository.findById(companyId).get();
+		Company company = getCompanyWithEmployees(companyId).get();
 		for (Employee employee : company.getEmployees()) {
 			employee.setCompany(null);
 		}
@@ -78,7 +78,7 @@ public class CompanyService extends BaseService<Company> {
 	}
 	
 	public List<Company> getCompaniesWithHighSalaryEmployee(int salary) {
-		return ((CompanyRepository)repository).getCompaniesWithHighSalaryEmployee(salary);
+		return ((CompanyRepository)repository).getCompaniesWithHighSalaryEmployeeEager(salary);
 	}
 	
 	public List<Company> getCompaniesWithEmployeesMoreThan(long count) {

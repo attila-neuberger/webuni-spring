@@ -74,7 +74,7 @@ public class HrRestEmployeeController {
 		
 		// One transactional service call:
 		try {
-			Employee employee = employeeService.create(employeeMapper.dtoToEmployee(employeeDto));
+			Employee employee = employeeService.create(employeeMapper.dtoToEmployeeWithNoCompany(employeeDto));
 			return employeeMapper.employeeToDto(employee);
 		} catch (IllegalArgumentException e) {
 			throw new EmployeeException(String.format("Employee with ID '%d' already exists.", employeeDto.getId()));
@@ -92,7 +92,7 @@ public class HrRestEmployeeController {
 		
 		// One transactional service call:
 		try {
-			Employee employee = employeeService.modify(id, employeeMapper.dtoToEmployee(employeeDto));
+			Employee employee = employeeService.modify(id, employeeMapper.dtoToEmployeeWithNoCompany(employeeDto));
 			return employeeMapper.employeeToDtoWithNoCompany(employee);
 		} catch (NoSuchElementException e) {
 			throw new EmployeeException(String.format("Employee with ID '%d' does not exist.", id));

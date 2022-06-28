@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 
 import hu.webuni.hr.comtur.dto.IDtoKey;
@@ -20,8 +21,16 @@ import hu.webuni.hr.comtur.dto.IDtoKey;
 @NamedEntityGraph(
 	name = "Company.full",
 	attributeNodes = {
-		@NamedAttributeNode("employees"),
+		@NamedAttributeNode(value = "employees", subgraph = "employees-subgraph"),
 		@NamedAttributeNode("companyType")
+	},
+	subgraphs = {
+		@NamedSubgraph(
+			name = "employees-subgraph",
+			attributeNodes = {
+				@NamedAttributeNode("position")
+			}
+		)
 	}
 )
 public class Company implements IDtoKey {

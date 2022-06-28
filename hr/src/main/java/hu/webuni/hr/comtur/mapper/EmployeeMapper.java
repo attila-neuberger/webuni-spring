@@ -29,10 +29,15 @@ public interface EmployeeMapper {
 	@IterableMapping(qualifiedByName = "summary")
 	List<EmployeeDto> employeesToDtosWithNoCompany(List<Employee> employees);
 
+	@Named("summary")
 	@Mapping(target = "company", ignore = true)
 	@InheritInverseConfiguration(name = "employeeToDtoWithNoCompany")
+	Employee dtoToEmployeeWithNoCompany(EmployeeDto employeeDto);
+	
+	@InheritInverseConfiguration(name = "employeeToDto")
 	Employee dtoToEmployee(EmployeeDto employeeDto);
 	
+	@IterableMapping(qualifiedByName = "summary")
 	List<Employee> dtosToEmployees(List<EmployeeDto> employeeDtos);
 	
 	/* ***** Mappings of nested objects: ***** */

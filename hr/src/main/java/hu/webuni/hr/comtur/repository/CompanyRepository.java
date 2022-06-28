@@ -18,6 +18,20 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 			"WHERE e.salary >= :salary")
 	List<Company> getCompaniesWithHighSalaryEmployee(int salary);
 	
+	/**
+	 * Method getCompaniesWithHighSalaryEmployee has lazy initialization problem.
+	 * This method is an eager type of the original, with a different SQL query logic.
+	 * @param salary Salary threshold value.
+	 * @return List of companies having employees with salary at least the parametric.
+	 */
+	@Query(
+			"SELECT DISTINCT c " +
+			"FROM Company c " + 
+				"JOIN c.employees es " + 
+			"WHERE es.salary >= :salary")
+	@EntityGraph("Company.full")
+	List<Company> getCompaniesWithHighSalaryEmployeeEager(int salary);
+	
 	@Query(
 			"SELECT c " +
 			"FROM Employee e " +
