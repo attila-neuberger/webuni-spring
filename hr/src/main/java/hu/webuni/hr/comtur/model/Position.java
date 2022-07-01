@@ -1,21 +1,14 @@
 package hu.webuni.hr.comtur.model;
 
 import java.util.List;
-import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
 @Entity
-public class Position {
+public class Position extends Id {
 
-	@Id
-	@GeneratedValue
-	private long id;
-	
 	@Column(nullable = false)
 	private String name;
 	
@@ -25,19 +18,14 @@ public class Position {
 	@OneToMany(mappedBy = "position")
 	private List<Employee> employees;
 	
-	public Position() {}
+	public Position() {
+		super();
+	}
 
 	public Position(String name, Education minEducation) {
+		super();
 		this.name = name;
 		this.minEducation = minEducation;
-	}
-
-	public long getId() {
-		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
 	}
 
 	public String getName() {
@@ -65,24 +53,7 @@ public class Position {
 	}
 
 	@Override
-	public int hashCode() {
-		return Objects.hash(id);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Position other = (Position) obj;
-		return id == other.id;
-	}
-
-	@Override
 	public String toString() {
-		return "Position [id=" + id + ", name=" + name + ", minEducation=" + minEducation + "]";
+		return "Position [id=" + getId() + ", name=" + name + ", minEducation=" + minEducation + "]";
 	}
 }

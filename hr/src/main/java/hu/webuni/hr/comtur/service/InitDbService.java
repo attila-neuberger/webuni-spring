@@ -19,6 +19,7 @@ import hu.webuni.hr.comtur.repository.CompanyTypeRepository;
 import hu.webuni.hr.comtur.repository.EmployeeRepository;
 import hu.webuni.hr.comtur.repository.PositionRepository;
 import hu.webuni.hr.comtur.repository.PositionXCompanyRepository;
+import hu.webuni.hr.comtur.repository.VacationRequestRepository;
 
 @Service
 public class InitDbService {
@@ -48,12 +49,16 @@ public class InitDbService {
 	@Autowired
 	private PositionXCompanyRepository positionXCompanyRepository;
 	
+	@Autowired
+	private VacationRequestRepository vacationRequestRepository;
+	
 	/**
 	 * Saved company reference for running repository methods.
 	 */
 	private Company testCompany;
 	
 	public void clearDatabase() {
+		vacationRequestRepository.deleteAll();
 		positionXCompanyRepository.deleteAll();
 		employeeRepository.deleteAll();
 		companyRepository.deleteAll();

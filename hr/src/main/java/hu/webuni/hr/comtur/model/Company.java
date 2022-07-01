@@ -2,20 +2,15 @@ package hu.webuni.hr.comtur.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
-
-import hu.webuni.hr.comtur.dto.IDtoKey;
 
 @Entity
 @NamedEntityGraph(
@@ -33,12 +28,8 @@ import hu.webuni.hr.comtur.dto.IDtoKey;
 		)
 	}
 )
-public class Company implements IDtoKey {
+public class Company extends Id {
 
-	@Id
-	@GeneratedValue
-	private long id;
-	
 	@Column(nullable = false)
 	private long companyRegistrationNumber;
 	
@@ -55,10 +46,12 @@ public class Company implements IDtoKey {
 	private List<Employee> employees;
 
 	public Company() {
+		super();
 		this.employees = new ArrayList<>();
 	}
 
 	public Company(long companyRegistrationNumber, String name, CompanyType companyType, String address) {
+		super();
 		this.companyRegistrationNumber = companyRegistrationNumber;
 		this.name = name;
 		this.companyType = companyType;
@@ -68,7 +61,7 @@ public class Company implements IDtoKey {
 	
 	public Company(long id, long companyRegistrationNumber, String name, CompanyType companyType, String address, 
 			List<Employee> employees) {
-		this.id = id;
+		super(id);
 		this.companyRegistrationNumber = companyRegistrationNumber;
 		this.name = name;
 		this.companyType = companyType;
@@ -76,16 +69,6 @@ public class Company implements IDtoKey {
 		this.employees = employees == null ? new ArrayList<>() : employees;
 	}
 	
-	@Override
-	public long getId() {
-		return id;
-	}
-
-	@Override
-	public void setId(long id) {
-		this.id = id;
-	}
-
 	public long getCompanyRegistrationNumber() {
 		return companyRegistrationNumber;
 	}
@@ -135,25 +118,8 @@ public class Company implements IDtoKey {
 	}
 
 	@Override
-	public int hashCode() {
-		return Objects.hash(id);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Company other = (Company) obj;
-		return id == other.id;
-	}
-
-	@Override
 	public String toString() {
-		return "Company [id=" + id + ", companyRegistrationNumber=" + companyRegistrationNumber + ", name=" + name
+		return "Company [id=" + getId() + ", companyRegistrationNumber=" + companyRegistrationNumber + ", name=" + name
 				+ ", companyType=" + companyType + ", address=" + address + "]";
 	}
 }

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +41,7 @@ public abstract class EmployeeService extends BaseService<Employee> implements I
 		return ((EmployeeRepository)repository).findBySalaryGreaterThan(salaryThreshold);
 	}
 	
-	public List<Employee> findByPosition(String position, Pageable pageable) {
+	public List<Employee> findByPosition(String position, @PageableDefault(sort = {"id"}) Pageable pageable) {
 		Page<Employee> page = ((EmployeeRepository)repository).findByPositionName(position, pageable);
 		System.out.println("Page object of findByPosition:");
 		System.out.println("   page.getNumber(): " + page.getNumber());
