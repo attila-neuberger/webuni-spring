@@ -6,6 +6,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import hu.comtur.airport.service.AirportService;
+import hu.comtur.airport.service.InitDbService;
 import hu.comtur.airport.service.PriceService;
 
 @SpringBootApplication
@@ -18,6 +19,9 @@ public class AirportApplication implements CommandLineRunner {
 	@Autowired
 	private AirportService airportService;
 	
+	@Autowired
+	private InitDbService initDbService;
+	
 	public static void main(String[] args) {
 		SpringApplication.run(AirportApplication.class, args);
 	}
@@ -27,5 +31,6 @@ public class AirportApplication implements CommandLineRunner {
 		System.out.println(priceService.getFinalPrice(200));
 		System.out.println(priceService.getFinalPrice(20_000));
 		// airportService.createFlight();
+		initDbService.createUsersIfNeeded();
 	}
 }
