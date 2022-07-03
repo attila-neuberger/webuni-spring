@@ -3,6 +3,10 @@ package hu.webuni.hr.comtur.web;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -110,7 +114,7 @@ public class VacationRequestControllerIt {
 	}
 	
 	/**
-	 * Gets sorted vacation request list (GET to base URI, body is list of {@link VacationRequestDto}s).
+	 * Gets sorted vacation request list (GET to base URI).
 	 * @return List of vacation requests.
 	 */
 	private List<VacationRequestDto> getAllVacationRequests() {
@@ -272,91 +276,252 @@ public class VacationRequestControllerIt {
 				.is5xxServerError();
 	}
 	
-	/*@Test
-	void testThatModifiedEmployeeIsListed() throws Exception {
-		List<EmployeeDto> employeesBefore = getAllEmployees();
-		if (!employeesBefore.isEmpty()) {
-			EmployeeDto employeeDto = employeesBefore.get(0);
-			System.out.println("TestThatModifiedEmployeeIsListed employeeDto: " + employeeDto.getName());
-			EmployeeDto employeeDtoSavedState = new EmployeeDto(employeeDto.getId(), 
-					employeeDto.getName(), employeeDto.getTitle(), employeeDto.getSalary(), employeeDto.getStartDate());
-			employeeDto.setName(employeeDto.getName() + " (modified)");
-			PositionDto modifiedPositionDto = new PositionDto(employeeDto.getTitle().getName() + " (modified)", 
-					employeeDto.getTitle().getMinEducation());
-			modifiedPositionDto.setId(employeeDto.getTitle().getId());
-			employeeDto.setTitle(modifiedPositionDto);
-			employeeDto.setSalary(employeeDto.getSalary() + 1);
-			employeeDto.setStartDate(employeeDto.getStartDate().minusYears(1));
-			modifyEmployee(employeeDto);
-			List<EmployeeDto> employeesAfter = getAllEmployees();
-			
-			assertThat(employeesAfter.size()).isEqualTo(employeesBefore.size());
-			if (employeesBefore.size() > 0) {
-				assertThat(employeesAfter.subList(1, employeesBefore.size()))
-						.containsExactlyElementsOf(employeesAfter.subList(1, employeesAfter.size()));
-			}
-			assertThat(employeesAfter.get(0)).isEqualTo(employeeDto);
-			assertThat(employeesAfter.get(0).getId()).isEqualTo(employeeDtoSavedState.getId());
-			assertThat(employeesAfter.get(0).getName()).isEqualTo(employeeDtoSavedState.getName() + " (modified)");
-			assertThat(employeesAfter.get(0).getTitle().getName()).isEqualTo(employeeDtoSavedState.getTitle().getName() + " (modified)");
-			assertThat(employeesAfter.get(0).getSalary()).isEqualTo(employeeDtoSavedState.getSalary() + 1);
-			assertThat(employeesAfter.get(0).getStartDate()).isEqualTo(employeeDtoSavedState.getStartDate().minusYears(1));
-		}
-	}*/
+	// Modifying vacation requests tested via Postman.
 	
-	/**
-	 * Modifies an employee (PUT to base URI + /ID, body is an {@link EmployeeDto}).
-	 * @param employeeDto Employee to modify.
-	 */
-	/*private void modifyEmployee(EmployeeDto employeeDto) {
-		webTestClient
-				.put()
-				.uri(String.format("%s/%d", BASE_URI, employeeDto.getId()))
-				.bodyValue(employeeDto)
-				.exchange()
-				.expectStatus()
-				.isOk();
+	// Deleting vacation requests tested via Postman.
+		
+	@Test
+	void testVacationRequestFiltering() throws Exception {
+		LocalDate now = LocalDate.now();
+
+		VacationRequestDto requestRaw1 = new VacationRequestDto(now.plusDays(8), now.plusDays(12));
+		VacationRequestDto request1 = createVacationRequest(requestRaw1, employees[0].getId());
+		VacationRequestDto requestRaw2 = new VacationRequestDto(now.plusDays(20), now.plusDays(20));
+		@SuppressWarnings("unused")
+		VacationRequestDto request2 = createVacationRequest(requestRaw2, employees[0].getId());
+		VacationRequestDto requestRaw3 = new VacationRequestDto(now.plusDays(10), now.plusDays(16));
+		VacationRequestDto request3 = createVacationRequest(requestRaw3, employees[1].getId());
+		VacationRequestDto requestRaw4 = new VacationRequestDto(now.plusDays(18), now.plusDays(19));
+		VacationRequestDto request4 = createVacationRequest(requestRaw4, employees[1].getId());
+		approveOrRefuseRequest(employees[2].getId(), "approve", request1.getId());
+		approveOrRefuseRequest(employees[2].getId(), "approve", request3.getId());
+		approveOrRefuseRequest(employees[2].getId(), "approve", request4.getId());
+		
+		List<VacationRequestDto> originalList = getAllVacationRequests();
+		
+		VacationRequestDto emptyVacationRequestDto = new VacationRequestDto();
+		emptyVacationRequestDto.setVacationRequestStatus(null);
+		
+		List<VacationRequestDto> listPage1 = getFoundLocationRequests(0, 20, null, null, null, null, null, emptyVacationRequestDto);
+		for (int i = 0; i < listPage1.size(); ++i) {
+			assertThat(listPage1.get(i))
+				.usingRecursiveComparison()
+				.ignoringFields("tsCreated")
+				.isEqualTo(originalList.get(i));
+			assertThat(listPage1.get(i).getTsCreated()).isCloseTo(originalList.get(i).getTsCreated(), within(1, ChronoUnit.MICROS));
+		}
+		
+		List<VacationRequestDto> listPage2 = getFoundLocationRequests(0, 3, null, null, null, null, null, emptyVacationRequestDto);
+		for (int i = 0; i < listPage2.size(); ++i) {
+			assertThat(listPage2.get(i))
+				.usingRecursiveComparison()
+				.ignoringFields("tsCreated")
+				.isEqualTo(originalList.get(i));
+			assertThat(listPage2.get(i).getTsCreated()).isCloseTo(originalList.get(i).getTsCreated(), within(1, ChronoUnit.MICROS));
+		}
+		assertThat(listPage2.size()).isEqualTo(3);
+		
+		List<VacationRequestDto> listPage3 = getFoundLocationRequests(1, 3, null, null, null, null, null, emptyVacationRequestDto);
+		for (int i = 0; i < listPage3.size(); ++i) {
+			assertThat(listPage3.get(i))
+				.usingRecursiveComparison()
+				.ignoringFields("tsCreated")
+				.isEqualTo(originalList.get(i + 3));
+			assertThat(listPage3.get(i).getTsCreated()).isCloseTo(originalList.get(i + 3).getTsCreated(), within(1, ChronoUnit.MICROS));
+		}
+		assertThat(listPage3.size()).isEqualTo(1);
+		
+		List<VacationRequestDto> listSort1 = getFoundLocationRequests(null, null, "vacationRequestStatus",
+				null, null, null, null, emptyVacationRequestDto);
+		assertThat(listSort1.get(0).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.CREATED);
+		assertThat(listSort1.get(1).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
+		assertThat(listSort1.get(2).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
+		assertThat(listSort1.get(3).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
+		
+		List<VacationRequestDto> listSort2 = getFoundLocationRequests(null, null, "vacationRequestStatus,desc",
+				null, null, null, null, emptyVacationRequestDto);
+		assertThat(listSort2.get(0).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
+		assertThat(listSort2.get(1).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
+		assertThat(listSort2.get(2).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
+		assertThat(listSort2.get(3).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.CREATED);
+		
+		List<VacationRequestDto> listSort3 = getFoundLocationRequests(null, null, "vacationRequestStatus,desc&sort=requester.id",
+				null, null, null, null, emptyVacationRequestDto);
+		assertThat(listSort3.get(0).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
+		assertThat(listSort3.get(0).getRequester()).isEqualTo(employees[0]);
+		assertThat(listSort3.get(1).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
+		assertThat(listSort3.get(1).getRequester()).isEqualTo(employees[1]);
+		assertThat(listSort3.get(2).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
+		assertThat(listSort3.get(2).getRequester()).isEqualTo(employees[1]);
+		assertThat(listSort3.get(3).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.CREATED);
+		assertThat(listSort3.get(3).getRequester()).isEqualTo(employees[0]);
+		
+		List<VacationRequestDto> listSort4 = getFoundLocationRequests(null, null, "vacationRequestStatus,desc&sort=requester.id,desc",
+				null, null, null, null, emptyVacationRequestDto);
+		assertThat(listSort4.get(0).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
+		assertThat(listSort4.get(0).getRequester()).isEqualTo(employees[1]);
+		assertThat(listSort4.get(1).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
+		assertThat(listSort4.get(1).getRequester()).isEqualTo(employees[1]);
+		assertThat(listSort4.get(2).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
+		assertThat(listSort4.get(2).getRequester()).isEqualTo(employees[0]);
+		assertThat(listSort4.get(3).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.CREATED);
+		assertThat(listSort4.get(3).getRequester()).isEqualTo(employees[0]);
+		
+		List<VacationRequestDto> listRequestedInterval_6_7 = getFoundLocationRequests(null, null, null,
+				now.plusDays(6), now.plusDays(7), null, null, emptyVacationRequestDto);
+		assertThat(listRequestedInterval_6_7).isEmpty();
+		
+		List<VacationRequestDto> listRequestedInterval_6_8 = getFoundLocationRequests(null, null, null,
+				now.plusDays(6), now.plusDays(8), null, null, emptyVacationRequestDto);
+		assertThat(listRequestedInterval_6_8.size()).isEqualTo(1);
+		assertThat(listRequestedInterval_6_8.get(0)).isEqualTo(originalList.get(0));
+		
+		List<VacationRequestDto> listRequestedInterval_6_9 = getFoundLocationRequests(null, null, null,
+				now.plusDays(6), now.plusDays(9), null, null, emptyVacationRequestDto);
+		assertThat(listRequestedInterval_6_9.size()).isEqualTo(1);
+		assertThat(listRequestedInterval_6_9.get(0)).isEqualTo(originalList.get(0));
+		
+		List<VacationRequestDto> listRequestedInterval_6_10 = getFoundLocationRequests(null, null, null,
+				now.plusDays(6), now.plusDays(10), null, null, emptyVacationRequestDto);
+		assertThat(listRequestedInterval_6_10.size()).isEqualTo(2);
+		assertThat(listRequestedInterval_6_10.get(0)).isEqualTo(originalList.get(0));
+		assertThat(listRequestedInterval_6_10.get(1)).isEqualTo(originalList.get(2));
+		
+		List<VacationRequestDto> listRequestedInterval_11_19 = getFoundLocationRequests(null, null, null,
+				now.plusDays(11), now.plusDays(19), null, null, emptyVacationRequestDto);
+		assertThat(listRequestedInterval_11_19.size()).isEqualTo(3);
+		assertThat(listRequestedInterval_11_19.get(0)).isEqualTo(originalList.get(0));
+		assertThat(listRequestedInterval_11_19.get(1)).isEqualTo(originalList.get(2));
+		assertThat(listRequestedInterval_11_19.get(2)).isEqualTo(originalList.get(3));
+		
+		List<VacationRequestDto> listRequestedInterval_15_20 = getFoundLocationRequests(null, null, null,
+				now.plusDays(15), now.plusDays(20), null, null, emptyVacationRequestDto);
+		assertThat(listRequestedInterval_15_20.size()).isEqualTo(3);
+		assertThat(listRequestedInterval_15_20.get(0)).isEqualTo(originalList.get(1));
+		assertThat(listRequestedInterval_15_20.get(1)).isEqualTo(originalList.get(2));
+		assertThat(listRequestedInterval_15_20.get(2)).isEqualTo(originalList.get(3));
+		
+		VacationRequestDto approvedVacationRequestDto = new VacationRequestDto();
+		approvedVacationRequestDto.setVacationRequestStatus(VacationRequestStatus.APPROVED);
+		List<VacationRequestDto> listApprovedRequests = getFoundLocationRequests(null, null, null,
+				null, null, null, null, approvedVacationRequestDto);
+		assertThat(listApprovedRequests.size()).isEqualTo(3);
+		assertThat(listApprovedRequests.get(0)).isEqualTo(originalList.get(0));
+		assertThat(listApprovedRequests.get(1)).isEqualTo(originalList.get(2));
+		assertThat(listApprovedRequests.get(2)).isEqualTo(originalList.get(3));
+		
+		VacationRequestDto createdVacationRequestDto = new VacationRequestDto();
+		createdVacationRequestDto.setVacationRequestStatus(VacationRequestStatus.CREATED);
+		List<VacationRequestDto> listCreatedRequests = getFoundLocationRequests(null, null, null,
+				null, null, null, null, createdVacationRequestDto);
+		assertThat(listCreatedRequests.size()).isEqualTo(1);
+		assertThat(listCreatedRequests.get(0)).isEqualTo(originalList.get(1));
+		
+		VacationRequestDto emp1VacationRequestDto = new VacationRequestDto();
+		emp1VacationRequestDto.setVacationRequestStatus(null);
+		emp1VacationRequestDto.setRequester(employees[1]);
+		
+		List<VacationRequestDto> emp1Requests = getFoundLocationRequests(null, null, null,
+				null, null, null, null, emp1VacationRequestDto);
+		assertThat(emp1Requests.size()).isEqualTo(2);
+		assertThat(emp1Requests.get(0)).isEqualTo(originalList.get(2));
+		assertThat(emp1Requests.get(1)).isEqualTo(originalList.get(3));
+		
+		VacationRequestDto emp1ApprovedVacationRequestDto = new VacationRequestDto();
+		emp1ApprovedVacationRequestDto.setVacationRequestStatus(VacationRequestStatus.APPROVED);
+		emp1ApprovedVacationRequestDto.setRequester(employees[1]);
+		List<VacationRequestDto> emp1ApprovedRequestsMultiple_12_16 = getFoundLocationRequests(0, 2, null,
+				now.plusDays(12), now.plusDays(16), null, null, emp1ApprovedVacationRequestDto);
+		assertThat(emp1ApprovedRequestsMultiple_12_16.size()).isEqualTo(1);
+		assertThat(emp1ApprovedRequestsMultiple_12_16.get(0)).isEqualTo(originalList.get(2));
 	}
 	
-	@Test
-	void testThatModifiedEmployeeValidationFails() throws Exception {
-		createEmployee(new EmployeeDto(123L, "Invalid test", new PositionDto("Position of invalid", Education.NONE), 
-				1000, LocalDateTime.now()));
-		List<EmployeeDto> employeesBefore = getAllEmployees();
-		if (!employeesBefore.isEmpty()) {
-			EmployeeDto employeeDto = employeesBefore.get(employeesBefore.size() - 1);
-			EmployeeDto employeeDtoSavedState = new EmployeeDto(employeeDto.getId(), 
-					employeeDto.getName(), employeeDto.getTitle(), employeeDto.getSalary(), employeeDto.getStartDate());
-			employeeDto.setName("");
-			modifyInvalidEmployee(employeeDto);
-			employeeDto.setName(employeeDtoSavedState.getName());
-			// employeeDto.setTitle(new PositionDto("", Education.NONE, 50)); // TODO Position validity test.
-			// modifyInvalidEmployee(employeeDto);
-			// employeeDto.setTitle(employeeDtoSavedState.getTitle());
-			employeeDto.setSalary(-1);
-			modifyInvalidEmployee(employeeDto);
-			employeeDto.setSalary(employeeDtoSavedState.getSalary());
-			employeeDto.setStartDate(LocalDateTime.now().plusDays(1));
-			modifyInvalidEmployee(employeeDto);
-			List<EmployeeDto> employeesAfter = getAllEmployees();
-			
-			assertThat(employeesAfter.size()).isEqualTo(employeesBefore.size());
-			assertThat(employeesAfter).containsExactlyElementsOf(employeesBefore);
-			assertThat(employeesAfter.get(employeesBefore.size() - 1)).isEqualTo(employeeDto);
-		}
-	}*/
-	
 	/**
-	 * Modifies an invalid employee (PUT to base URI + /ID, body is an {@link EmployeeDto}).
-	 * @param employeeDto Employee to modify.
+	 * Gets filtered, paged, sorted vacation requests from example (POST to extended URI, body is list of {@link VacationRequestDto}s).
+	 * @param page               Page page value.
+	 * @param size               Page size value.
+	 * @param sort               Page sort expression.
+	 * @param requestedFrom      Optional requested from value.
+	 * @param requestedTo        Optional requested to value.
+	 * @param createdFrom        Optional created from value.
+	 * @param createdTo          Optional created to value.
+	 * @param vacationRequestDto Vacation request example.
+	 * @return List of vacation requests.
 	 */
-	/*private void modifyInvalidEmployee(EmployeeDto employeeDto) {
-		webTestClient
-				.put()
-				.uri(String.format("%s/%d", BASE_URI, employeeDto.getId()))
-				.bodyValue(employeeDto)
+	private List<VacationRequestDto> getFoundLocationRequests(Integer page, Integer size, String sort, LocalDate requestedFrom,
+			LocalDate requestedTo, LocalDateTime createdFrom, LocalDateTime createdTo, VacationRequestDto vacationRequestDto) {
+		
+		String findUri = String.format("%s/find", BASE_URI_VACATION_REQUEST);
+		if (page != null || size != null || sort != null || requestedFrom != null || requestedTo != null
+				|| createdFrom != null || createdTo != null) {
+			DateFormat dfDay = new SimpleDateFormat("yyyy-MM-dd");
+			DateFormat dfSec = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			findUri += '?';
+			boolean firstAdded = false;
+			if (page != null) {
+				findUri += "page=" + page.intValue();
+				firstAdded = true;
+			}
+			if (size != null) {
+				if (firstAdded) {
+					findUri += "&size=" + size.intValue();
+				} else {
+					findUri += "size=" + size.intValue();
+					firstAdded = true;
+				}
+			}
+			if (sort != null) {
+				if (firstAdded) {
+					findUri += "&sort=" + sort;
+				} else {
+					findUri += "sort=" + sort;
+					firstAdded = true;
+				}
+			}
+			if (requestedFrom != null) {
+				if (firstAdded) {
+					findUri += "&requestedFrom=" + dfDay.format(Date.valueOf(requestedFrom).getTime());
+				} else {
+					findUri += "requestedFrom=" + dfDay.format(Date.valueOf(requestedFrom).getTime());
+					firstAdded = true;
+				}
+			}
+			if (requestedTo != null) {
+				if (firstAdded) {
+					findUri += "&requestedTo=" + dfDay.format(Date.valueOf(requestedTo).getTime());
+				} else {
+					findUri += "requestedTo=" + dfDay.format(Date.valueOf(requestedTo).getTime());
+					firstAdded = true;
+				}
+			}
+			if (createdFrom != null) {
+				if (firstAdded) {
+					findUri += "&createdFrom=" + (dfSec.format(Timestamp.valueOf(createdFrom).getTime()).replaceAll(" ", "T"));
+				} else {
+					findUri += "createdFrom=" + (dfSec.format(Timestamp.valueOf(createdFrom).getTime()).replaceAll(" ", "T"));
+					firstAdded = true;
+				}
+			}
+			if (createdTo != null) {
+				if (firstAdded) {
+					findUri += "&createdTo=" + (dfSec.format(Timestamp.valueOf(createdTo).getTime()).replaceAll(" ", "T"));
+				} else {
+					findUri += "createdTo=" + (dfSec.format(Timestamp.valueOf(createdTo).getTime()).replaceAll(" ", "T"));
+					firstAdded = true;
+				}
+			}
+		}
+		System.out.println("Request URI: " + findUri);
+		List<VacationRequestDto> responseList =  webTestClient
+				.post()
+				.uri(findUri)
+				.bodyValue(vacationRequestDto)
 				.exchange()
 				.expectStatus()
-				.isBadRequest();
-	}*/
+				.isOk()
+				.expectBodyList(VacationRequestDto.class)
+				.returnResult()
+				.getResponseBody();
+		return responseList;
+	}
 }
