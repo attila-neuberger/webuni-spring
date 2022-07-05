@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,7 @@ import hu.webuni.hr.comtur.dto.Views;
 import hu.webuni.hr.comtur.mapper.VacationRequestMapper;
 import hu.webuni.hr.comtur.model.VacationRequest;
 import hu.webuni.hr.comtur.model.VacationRequestStatus;
+import hu.webuni.hr.comtur.security.ExtendedUserPrincipal;
 import hu.webuni.hr.comtur.service.VacationRequestService;
 import hu.webuni.hr.comtur.service.exception.VacationRequestException;
 
@@ -50,12 +52,26 @@ public class HrRestVacationRequestController {
 	@PostMapping("/{requesterId}")
 	@JsonView(Views.VisibleData.class)
 	public VacationRequestDto create(@PathVariable long requesterId, @RequestBody @Valid VacationRequestDto vacationRequestDto) {
+		checkAuthorization(requesterId);
 		try {
 			VacationRequest vacationRequest = vacationRequestService.createVacationRequest(requesterId,
 					vacationRequestMapper.dtoToVacationRequest(vacationRequestDto));
 			return vacationRequestMapper.vacationRequestToDto(vacationRequest);
 		} catch (NoSuchElementException e) {
 			throw new VacationRequestException(String.format("Employee with ID '%d' does not exist (requester employee).", requesterId));
+		}
+	}
+
+	/**
+	 * Checks user's authorization and requester ID.
+	 * @param requesterId Requester ID path parameter.
+	 * @throws VacationRequestException In case of authorization failure.
+	 */
+	private void checkAuthorization(long requesterId) throws VacationRequestException {
+		ExtendedUserPrincipal principal = (ExtendedUserPrincipal)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		if (principal.getEmployee().getId() != requesterId) {
+			throw new VacationRequestException(String.format("Requester employee's ID (%d) is not the logged user's ID (%d)",
+					requesterId, principal.getEmployee().getId()));
 		}
 	}
 	
@@ -85,6 +101,8 @@ public class HrRestVacationRequestController {
 	@JsonView(Views.VisibleData.class)
 	public VacationRequestDto modify(@PathVariable long requesterId, @PathVariable long id,
 			@RequestBody @Valid VacationRequestDto vacationRequestDto) {
+		
+		checkAuthorization(requesterId);
 		try {
 			VacationRequest vacationRequest = vacationRequestService.modifyVacationRequest(requesterId, id,
 					vacationRequestMapper.dtoToVacationRequest(vacationRequestDto));
@@ -96,7 +114,9 @@ public class HrRestVacationRequestController {
 	
 	@DeleteMapping("/{requesterId}/delete/{id}")
 	@JsonView(Views.VisibleData.class)
-	public void delete(@PathVariable long requesterId, @PathVariable long id, @RequestBody VacationRequestDto vacationRequestDto) {
+	public void delete(@PathVariable long requesterId, @PathVariable long id) {
+		
+		checkAuthorization(requesterId);
 		try {
 			vacationRequestService.deleteVacationRequest(requesterId, id);
 		} catch (NoSuchElementException | IllegalStateException e) {

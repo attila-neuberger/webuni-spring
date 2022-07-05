@@ -84,4 +84,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSp
 			"WHERE e.id = :id")
 	@EntityGraph(attributePaths = {"position", "company", "company.companyType"})
 	Optional<Employee> getEmployeeWithCompany(long id);
+	
+	Optional<Employee> findByUserName(String userName);
 }

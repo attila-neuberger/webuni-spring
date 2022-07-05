@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import hu.webuni.hr.comtur.model.Company;
@@ -52,6 +53,11 @@ public class InitDbService {
 	@Autowired
 	private VacationRequestRepository vacationRequestRepository;
 	
+	/* ********** Password encoder ********** */
+	
+	@Autowired
+	PasswordEncoder passwordEncoder;
+	
 	/**
 	 * Saved company reference for running repository methods.
 	 */
@@ -84,35 +90,56 @@ public class InitDbService {
 		List<Employee> employees = new ArrayList<>() {{
 			
 			// Company 1
-			add(new Employee("Attila", new Position("Vezér", Education.UNIVERSITY), 4000, LocalDateTime.of(2010, 1, 1, 0, 0), company1));
-			add(new Employee("Edit", new Position("Segítő", Education.GRADUATION), 2800, LocalDateTime.of(2018, 1, 1, 0, 0), company1));
-			add(new Employee("Mici", new Position("Naplopó", Education.NONE), 1000, LocalDateTime.of(2022, 1, 1, 0, 0), company1));
+			Employee employee1 = new Employee("Attila", new Position("Vezér", Education.UNIVERSITY), 4000, LocalDateTime.of(2010, 1, 1, 0, 0), company1,
+					"u_attila", passwordEncoder.encode("pass"), null);
+			add(employee1);
+			add(new Employee("Edit", new Position("Segítő", Education.GRADUATION), 2800, LocalDateTime.of(2018, 1, 1, 0, 0), company1,
+					"u_edit", passwordEncoder.encode("pass"), employee1));
+			add(new Employee("Mici", new Position("Naplopó", Education.NONE), 1000, LocalDateTime.of(2022, 1, 1, 0, 0), company1,
+					"u_mici", passwordEncoder.encode("pass"), employee1));
 			
 			// Company 2
 			Position positionS2 = new Position("Segítő", Education.GRADUATION);
-			add(new Employee("Arthur Dent", new Position("Naplopó", Education.NONE), 100, LocalDateTime.of(2020, 1, 1, 0, 0), company2));
-			add(new Employee("Ford Prefect", positionS2, 10_000, LocalDateTime.of(2015, 1, 1, 0, 0), company2));
-			add(new Employee("Trillian", positionS2, 11_000, LocalDateTime.of(2018, 1, 1, 0, 0), company2));
-			add(new Employee("Zaphod Beeblebrox", new Position("Vezér", Education.COLLEGE), 50_000_000, LocalDateTime.of(2005, 1, 1, 0, 0), company2));
+			Employee employee2 = new Employee("Zaphod Beeblebrox", new Position("Vezér", Education.COLLEGE), 50_000_000, LocalDateTime.of(2005, 1, 1, 0, 0), company2,
+					"u_zaphod", passwordEncoder.encode("pass"), null);
+			add(employee2);
+			add(new Employee("Arthur Dent", new Position("Naplopó", Education.NONE), 100, LocalDateTime.of(2020, 1, 1, 0, 0), company2,
+					"u_arthur", passwordEncoder.encode("pass"), employee2));
+			add(new Employee("Ford Prefect", positionS2, 10_000, LocalDateTime.of(2015, 1, 1, 0, 0), company2,
+					"u_ford", passwordEncoder.encode("pass"), employee2));
+			add(new Employee("Trillian", positionS2, 11_000, LocalDateTime.of(2018, 1, 1, 0, 0), company2,
+					"u_trillian", passwordEncoder.encode("pass"), employee2));
 			
 			// Company 3
 			Position positionS3 = new Position("Segítő", null);
 			Position positionN3 = new Position("Naplopó", Education.NONE);
-			add(new Employee("Michael Scofield", positionS3, 500, LocalDateTime.of(2022, 1, 1, 0, 0), company3));
-			add(new Employee("Lincoln Burrows", positionN3, 400, LocalDateTime.of(2018, 1, 1, 0, 0), company3));
-			add(new Employee("John Abruzzi", new Position("Vezér", Education.COLLEGE), 550, LocalDateTime.of(2014, 1, 1, 0, 0), company3));
-			add(new Employee("Charles Westmoreland", positionS3, 300, LocalDateTime.of(2005, 1, 1, 0, 0), company3));
-			add(new Employee("Theodore Bagwell", positionS3, 400, LocalDateTime.of(2016, 1, 1, 0, 0), company3));
-			add(new Employee("Benjamin Franklin", positionS3, 300, LocalDateTime.of(2019, 1, 1, 0, 0), company3));
-			add(new Employee("Charles Patoshik", positionN3, 100, LocalDateTime.of(2017, 1, 1, 0, 0), company3));
-			add(new Employee("David Apolskis", positionN3, 50, LocalDateTime.of(2022, 5, 1, 0, 0), company3));
+			Employee employee3 = new Employee("John Abruzzi", new Position("Vezér", Education.COLLEGE), 550, LocalDateTime.of(2014, 1, 1, 0, 0), company3,
+					"u_abruzzi", passwordEncoder.encode("pass"), null);
+			add(employee3);
+			add(new Employee("Michael Scofield", positionS3, 500, LocalDateTime.of(2022, 1, 1, 0, 0), company3,
+					"u_scofield", passwordEncoder.encode("pass"), employee3));
+			add(new Employee("Lincoln Burrows", positionN3, 400, LocalDateTime.of(2018, 1, 1, 0, 0), company3,
+					"u_burrows", passwordEncoder.encode("pass"), employee3));
+			add(new Employee("Charles Westmoreland", positionS3, 300, LocalDateTime.of(2005, 1, 1, 0, 0), company3,
+					"u_westmoreland", passwordEncoder.encode("pass"), employee3));
+			add(new Employee("Theodore Bagwell", positionS3, 400, LocalDateTime.of(2016, 1, 1, 0, 0), company3,
+					"u_bagwell", passwordEncoder.encode("pass"), employee3));
+			add(new Employee("Benjamin Franklin", positionS3, 300, LocalDateTime.of(2019, 1, 1, 0, 0), company3,
+					"u_franklin", passwordEncoder.encode("pass"), employee3));
+			add(new Employee("Charles Patoshik", positionN3, 100, LocalDateTime.of(2017, 1, 1, 0, 0), company3,
+					"u_patoshik", passwordEncoder.encode("pass"), employee3));
+			add(new Employee("David Apolskis", positionN3, 50, LocalDateTime.of(2022, 5, 1, 0, 0), company3,
+					"u_apolskis", passwordEncoder.encode("pass"), employee3));
 			
 			// Company 5
-			add(new Employee("Sanyi", new Position("Vezér", Education.PHD), 3500, LocalDateTime.of(2015, 1, 1, 0, 0), company5));
+			add(new Employee("Sanyi", new Position("Vezér", Education.PHD), 3500, LocalDateTime.of(2015, 1, 1, 0, 0), company5,
+					"u_sanyi", passwordEncoder.encode("pass"), null));
 			
 			// No company
-			add(new Employee("Tom", new Position("Naplopó", Education.NONE), 100, LocalDateTime.of(2017, 1, 1, 0, 0)));
-			add(new Employee("Jerry", new Position("Naplopó", Education.NONE), 100, LocalDateTime.of(2017, 1, 1, 0, 0)));
+			add(new Employee("Tom", new Position("Naplopó", Education.NONE), 100, LocalDateTime.of(2017, 1, 1, 0, 0), null,
+					"u_tom", passwordEncoder.encode("pass"), null));
+			add(new Employee("Jerry", new Position("Naplopó", Education.NONE), 100, LocalDateTime.of(2017, 1, 1, 0, 0), null,
+					"u_jerry", passwordEncoder.encode("pass"), null));
 		}};
 		
 		employeeService.saveAll(employees);
@@ -120,19 +147,19 @@ public class InitDbService {
 		@SuppressWarnings("serial")
 		List<PositionXCompany> positionXCompanies = new ArrayList<>() {{
 			
-			add(new PositionXCompany(2500, employees.get(0).getPosition(), company1));
-			add(new PositionXCompany(1250, employees.get(1).getPosition(), company1));
-			add(new PositionXCompany(1000, employees.get(2).getPosition(), company1));
+			add(new PositionXCompany(2500, employees.get(0).getPosition(), company1)); // Attila
+			add(new PositionXCompany(1250, employees.get(1).getPosition(), company1)); // Edit
+			add(new PositionXCompany(1000, employees.get(2).getPosition(), company1)); // Mici
 			
-			add(new PositionXCompany(100, employees.get(3).getPosition(), company2));
-			add(new PositionXCompany(1250, employees.get(4).getPosition(), company2));
-			add(new PositionXCompany(10_000, employees.get(6).getPosition(), company2));
+			add(new PositionXCompany(100, employees.get(4).getPosition(), company2)); // Arthur
+			add(new PositionXCompany(1250, employees.get(5).getPosition(), company2)); // Ford
+			add(new PositionXCompany(10_000, employees.get(3).getPosition(), company2)); // Zaphod
 			
-			add(new PositionXCompany(400, employees.get(7).getPosition(), company3));
-			add(new PositionXCompany(100, employees.get(8).getPosition(), company3));
-			add(new PositionXCompany(1000, employees.get(9).getPosition(), company3));
+			add(new PositionXCompany(400, employees.get(8).getPosition(), company3)); // Scofield
+			add(new PositionXCompany(100, employees.get(9).getPosition(), company3)); // Burrows
+			add(new PositionXCompany(1000, employees.get(7).getPosition(), company3)); // Abruzzi
 			
-			add(new PositionXCompany(3800, employees.get(15).getPosition(), company5));
+			add(new PositionXCompany(3800, employees.get(15).getPosition(), company5)); // Sanyi
 		}};
 		
 		positionXCompanyRepository.saveAll(positionXCompanies);

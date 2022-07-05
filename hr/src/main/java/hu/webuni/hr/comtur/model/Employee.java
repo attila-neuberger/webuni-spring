@@ -1,11 +1,13 @@
 package hu.webuni.hr.comtur.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 @Entity
 public class Employee extends Id implements Comparable<Employee> {
@@ -28,6 +30,17 @@ public class Employee extends Id implements Comparable<Employee> {
 	@ManyToOne // (cascade = {CascadeType.MERGE, CascadeType.REFRESH})
 	@JoinColumn(name = "company_id")
 	private Company company;
+	
+	private String userName;
+	
+	private String password;
+	
+	@ManyToOne
+	@JoinColumn(name = "supervisor_id")
+	private Employee supervisor;
+	
+	@OneToMany(mappedBy = "supervisor")
+	private List<Employee> subordinates;
 	
 	public Employee() {
 		super();
@@ -58,6 +71,19 @@ public class Employee extends Id implements Comparable<Employee> {
 		this.company = company;
 	}
 	
+	public Employee(String name, Position position, int salary, LocalDateTime startDate, Company company,
+			String userName, String password, Employee supervisor) {
+		super();
+		this.name = name;
+		this.position = position;
+		this.salary = salary;
+		this.startDate = startDate;
+		this.company = company;
+		this.userName = userName;
+		this.password = password;
+		this.supervisor = supervisor;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -98,14 +124,47 @@ public class Employee extends Id implements Comparable<Employee> {
 		this.company = company;
 	}
 
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public Employee getSupervisor() {
+		return supervisor;
+	}
+
+	public void setSupervisor(Employee supervisor) {
+		this.supervisor = supervisor;
+	}
+
 	@Override
 	public int compareTo(Employee o) {
 		return (int)(getId() - o.getId());
 	}
 
+	public List<Employee> getSubordinates() {
+		return subordinates;
+	}
+
+	public void setSubordinates(List<Employee> subordinates) {
+		this.subordinates = subordinates;
+	}
+
 	@Override
 	public String toString() {
-		return "Employee [id=" + getId() + ", name=" + name + ", position=" + position + ", salary=" + salary
-				+ ", startDate=" + startDate + "]";
+		return "Employee [name=" + name + ", position=" + position + ", salary=" + salary + ", startDate=" + startDate
+				+ ", company=" + company + ", userName=" + userName + ", password=" + password + ", supervisor="
+				+ supervisor + "]";
 	}
 }
