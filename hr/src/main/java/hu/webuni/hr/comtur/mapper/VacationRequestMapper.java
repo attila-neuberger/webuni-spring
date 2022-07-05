@@ -31,14 +31,14 @@ public interface VacationRequestMapper {
 	
 	@Mapping(target = "title", source = "position")
 	@Mapping(target = "company", ignore = true)
-	@Mapping(target = "supervisor", ignore = true)
+	@Mapping(target = "manager", ignore = true)
 	@Mapping(target = "subordinates", ignore = true)
 	EmployeeDto employeeToDtoWithNoCompany(Employee employee);
 
 	List<EmployeeDto> employeesToDtosWithNoCompany(List<Employee> employees);
 
 	@Mapping(target = "company", ignore = true)
-	@Mapping(target = "supervisor", ignore = true)
+	@Mapping(target = "manager", ignore = true)
 	@Mapping(target = "subordinates", ignore = true)
 	@InheritInverseConfiguration
 	Employee dtoToEmployee(EmployeeDto employeeDto);

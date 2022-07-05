@@ -146,6 +146,10 @@ public abstract class EmployeeService extends BaseService<Employee> implements I
 		}
 	}
 	
+	public Optional<Employee> getEmployeeWithSubordinates(long id) {
+		return getRepository().getEmployeeWithSubordinates(id);
+	}
+	
 	public EmployeeRepository getRepository() {
 		return (EmployeeRepository)super.getRepository();
 	}

@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -86,4 +87,19 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSp
 	Optional<Employee> getEmployeeWithCompany(long id);
 	
 	Optional<Employee> findByUserName(String userName);
+	
+	@Query(
+			"SELECT e " + 
+			"FROM Employee e " + 
+			"WHERE e.id = :id")
+	@EntityGraph(attributePaths = {"subordinates"}, type = EntityGraphType.LOAD)
+	Optional<Employee> getEmployeeWithSubordinates(long id);
+	
+	@Modifying
+	@Transactional
+	@Query(
+			"UPDATE Employee e " +
+			"SET e.password = :password " + 
+			"WHERE e.id = :id")
+	void setPassword(long id, String password);
 }

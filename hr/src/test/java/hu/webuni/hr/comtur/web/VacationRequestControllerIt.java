@@ -3,7 +3,6 @@ package hu.webuni.hr.comtur.web;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -13,6 +12,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,6 +22,8 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import hu.webuni.hr.comtur.dto.EmployeeDto;
@@ -29,6 +31,7 @@ import hu.webuni.hr.comtur.dto.PositionDto;
 import hu.webuni.hr.comtur.dto.VacationRequestDto;
 import hu.webuni.hr.comtur.model.Education;
 import hu.webuni.hr.comtur.model.VacationRequestStatus;
+import hu.webuni.hr.comtur.repository.EmployeeRepository;
 import hu.webuni.hr.comtur.repository.VacationRequestRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -54,19 +57,36 @@ public class VacationRequestControllerIt {
 		}
 	};
 	
+	@Autowired
+	private EmployeeRepository employeeRepository;
+	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	
+	private final static String USER_REQUESTER_NAME = "u_r",
+								USER_APPROVER_NAME = "u_a",
+								USER_REQUESTER_2_NAME = "u_r2",
+								PASSWORD = "pass";
+	
 	@BeforeAll
 	public void beforeEach() {
 		EmployeeDto[] employeesRaw = new EmployeeDto[] {
 				new EmployeeDto(1001L, "Employee 1", new PositionDto("Test position", Education.NONE), 
-						1001, LocalDateTime.of(2021, 1, 21, 21, 1, 1)),
+						1001, LocalDateTime.of(2021, 1, 21, 21, 1, 1), null, USER_APPROVER_NAME, null, null),
 				new EmployeeDto(1002L, "Employee 2", new PositionDto("Test position", Education.NONE), 
-						1002, LocalDateTime.of(2022, 1, 22, 22, 2, 2)),
+						1002, LocalDateTime.of(2022, 1, 22, 22, 2, 2), null, USER_REQUESTER_NAME, null, null),
 				new EmployeeDto(1003L, "Employee 3", new PositionDto("Test position", Education.NONE), 
-						1003, LocalDateTime.of(2013, 1, 23, 23, 3, 3))
+						1003, LocalDateTime.of(2013, 1, 23, 23, 3, 3), null, USER_REQUESTER_2_NAME, null, null)
 		};
 		employees = new EmployeeDto[employeesRaw.length];
 		for (int i = 0; i < employeesRaw.length; ++i) {
 			employees[i] = createEmployee(employeesRaw[i]);
+			if (i == 0) {
+				for (int j = 1; j < employeesRaw.length; ++j) {
+					employeesRaw[j].setManager(employees[i]);
+				}
+			}
+			employeeRepository.setPassword(employees[i].getId(), passwordEncoder.encode(PASSWORD));
 		}
 	}
 	
@@ -99,7 +119,7 @@ public class VacationRequestControllerIt {
 		List<VacationRequestDto> requestsBefore = getAllVacationRequests();
 		Collections.sort(requestsBefore, requestIdComparator);
 		VacationRequestDto requestRaw = new VacationRequestDto(now.plusDays(8), now.plusDays(12));
-		VacationRequestDto request = createVacationRequest(requestRaw, employees[0].getId());
+		VacationRequestDto request = createVacationRequest(requestRaw, employees[1].getId(), employees[1].getUserName());
 		List<VacationRequestDto> requestsAfter = getAllVacationRequests();
 		Collections.sort(requestsAfter, requestIdComparator);
 		
@@ -121,6 +141,12 @@ public class VacationRequestControllerIt {
 		List<VacationRequestDto> responseList = webTestClient
 				.get()
 				.uri(BASE_URI_VACATION_REQUEST)
+				.headers(new Consumer<HttpHeaders>() {
+					@Override
+					public void accept(HttpHeaders h) {
+						h.setBasicAuth(USER_REQUESTER_NAME, PASSWORD);
+					}
+				})
 				.exchange()
 				.expectStatus()
 				.isOk()
@@ -139,14 +165,16 @@ public class VacationRequestControllerIt {
 	
 	/**
 	 * Creates a vacation request (POST to base URI + ID of the requester).
-	 * @param request     Request object.
-	 * @param requesterId ID of the requester.
+	 * @param requestDto    Request object.
+	 * @param requesterId   ID of the requester.
+	 * @param requesterName User name of the requester.
 	 * @return Created request.
 	 */
-	private VacationRequestDto createVacationRequest(VacationRequestDto requestDto, long requesterId) {
+	private VacationRequestDto createVacationRequest(VacationRequestDto requestDto, long requesterId, String requesterName) {
 		return webTestClient
 				.post()
 				.uri(String.format("%s/%d", BASE_URI_VACATION_REQUEST, requesterId))
+				.headers(header -> header.setBasicAuth(requesterName, PASSWORD))
 				.bodyValue(requestDto)
 				.exchange()
 				.expectStatus()
@@ -161,9 +189,9 @@ public class VacationRequestControllerIt {
 		LocalDate now = LocalDate.now();
 		List<VacationRequestDto> requestsBefore = getAllVacationRequests();
 		VacationRequestDto requestInvalidRaw1 = new VacationRequestDto(now.minusDays(2), now.plusDays(2));
-		createInvalidVacationRequest(requestInvalidRaw1, employees[0].getId());
+		createInvalidVacationRequest(requestInvalidRaw1, employees[0].getId(), employees[0].getUserName());
 		VacationRequestDto requestInvalidRaw2 = new VacationRequestDto(now.plusDays(2), null);
-		createInvalidVacationRequest(requestInvalidRaw2, employees[0].getId());
+		createInvalidVacationRequest(requestInvalidRaw2, employees[0].getId(), employees[0].getUserName());
 		List<VacationRequestDto> requestsAfter = getAllVacationRequests();
 		
 		assertThat(requestsAfter)
@@ -173,13 +201,15 @@ public class VacationRequestControllerIt {
 	
 	/**
 	 * Creates a invalid vacation request (POST to base URI + ID of the requester).
-	 * @param request     Request object.
+	 * @param requestDto  Request object.
 	 * @param requesterId ID of the requester.
+	 * @param requesterName User name of the requester.
 	 */
-	private void createInvalidVacationRequest(VacationRequestDto requestDto, long requesterId) {
+	private void createInvalidVacationRequest(VacationRequestDto requestDto, long requesterId, String requesterName) {
 		webTestClient
 				.post()
 				.uri(String.format("%s/%d", BASE_URI_VACATION_REQUEST, requesterId))
+				.headers(header -> header.setBasicAuth(requesterName, PASSWORD))
 				.bodyValue(requestDto)
 				.exchange()
 				.expectStatus()
@@ -199,10 +229,10 @@ public class VacationRequestControllerIt {
 	private void testApproveOrRefuseRequest(String action, VacationRequestStatus expectedStatus) {
 		LocalDate now = LocalDate.now();
 		VacationRequestDto requestRaw = new VacationRequestDto(now.plusDays(8), now.plusDays(12));
-		VacationRequestDto request = createVacationRequest(requestRaw, employees[0].getId());
+		VacationRequestDto request = createVacationRequest(requestRaw, employees[1].getId(), employees[1].getUserName());
 		List<VacationRequestDto> requestsBefore = getAllVacationRequests();
 		Collections.sort(requestsBefore, requestIdComparator);
-		approveOrRefuseRequest(employees[1].getId(), action, request.getId());
+		approveOrRefuseRequest(employees[0].getId(), action, request.getId(), employees[0].getUserName());
 		List<VacationRequestDto> requestsAfter = getAllVacationRequests();
 		Collections.sort(requestsAfter, requestIdComparator);
 		
@@ -224,14 +254,16 @@ public class VacationRequestControllerIt {
 	
 	/**
 	 * Approves or refuses a request (GET to base URI + ID of the approver + action + ID of the request).
-	 * @param approverId ID of the approver employee.
-	 * @param action     Action of the operation (approve / refuse).
-	 * @param requestId ID of the request.
+	 * @param approverId   ID of the approver employee.
+	 * @param action       Action of the operation (approve / refuse).
+	 * @param requestId    ID of the request.
+	 * @param approverName User name of the approver.
 	 */
-	private void approveOrRefuseRequest(long approverId, String action, long requestId) {
+	private void approveOrRefuseRequest(long approverId, String action, long requestId, String approverName) {
 		webTestClient
 				.get()
 				.uri(String.format("%s/%d/%s/%d", BASE_URI_VACATION_REQUEST, approverId, action, requestId))
+				.headers(header -> header.setBasicAuth(approverName, PASSWORD))
 				.exchange()
 				.expectStatus()
 				.isOk();
@@ -246,12 +278,12 @@ public class VacationRequestControllerIt {
 	void testInvalidApproveRequest() throws Exception {
 		LocalDate now = LocalDate.now();
 		VacationRequestDto requestRaw = new VacationRequestDto(now.plusDays(8), now.plusDays(12));
-		VacationRequestDto request = createVacationRequest(requestRaw, employees[0].getId());
-		approveOrRefuseRequest(employees[1].getId(), "approve", request.getId());
+		VacationRequestDto request = createVacationRequest(requestRaw, employees[1].getId(), employees[1].getUserName());
+		approveOrRefuseRequest(employees[0].getId(), "approve", request.getId(), employees[0].getUserName());
 		List<VacationRequestDto> requestsBefore = getAllVacationRequests();
 		Collections.sort(requestsBefore, requestIdComparator);
-		approveOrRefuseInvalidRequest(employees[1].getId(), "approve", request.getId());
-		approveOrRefuseInvalidRequest(employees[2].getId(), "refuse", request.getId());
+		approveOrRefuseInvalidRequest(employees[1].getId(), "approve", request.getId(), employees[1].getUserName());
+		approveOrRefuseInvalidRequest(employees[0].getId(), "refuse", request.getId(), employees[0].getUserName());
 		List<VacationRequestDto> requestsAfter = getAllVacationRequests();
 		Collections.sort(requestsAfter, requestIdComparator);
 		
@@ -263,14 +295,16 @@ public class VacationRequestControllerIt {
 	/**
 	 * Approves or refuses a request (GET to base URI + ID of the approver + action + ID of the request).
 	 * The action is invalid on the request.
-	 * @param approverId ID of the approver employee.
-	 * @param action     Action of the operation (approve / refuse).
-	 * @param requestId ID of the request.
+	 * @param approverId   ID of the approver employee.
+	 * @param action       Action of the operation (approve / refuse).
+	 * @param requestId    ID of the request.
+	 * @param approverName User name of the approver.
 	 */
-	private void approveOrRefuseInvalidRequest(long approverId, String action, long requestId) {
+	private void approveOrRefuseInvalidRequest(long approverId, String action, long requestId, String approverName) {
 		webTestClient
 				.get()
 				.uri(String.format("%s/%d/%s/%d", BASE_URI_VACATION_REQUEST, approverId, action, requestId))
+				.headers(header -> header.setBasicAuth(approverName, PASSWORD))
 				.exchange()
 				.expectStatus()
 				.is5xxServerError();
@@ -285,24 +319,24 @@ public class VacationRequestControllerIt {
 		LocalDate now = LocalDate.now();
 
 		VacationRequestDto requestRaw1 = new VacationRequestDto(now.plusDays(8), now.plusDays(12));
-		VacationRequestDto request1 = createVacationRequest(requestRaw1, employees[0].getId());
+		VacationRequestDto request1 = createVacationRequest(requestRaw1, employees[1].getId(), employees[1].getUserName());
 		VacationRequestDto requestRaw2 = new VacationRequestDto(now.plusDays(20), now.plusDays(20));
 		@SuppressWarnings("unused")
-		VacationRequestDto request2 = createVacationRequest(requestRaw2, employees[0].getId());
+		VacationRequestDto request2 = createVacationRequest(requestRaw2, employees[1].getId(), employees[1].getUserName());
 		VacationRequestDto requestRaw3 = new VacationRequestDto(now.plusDays(10), now.plusDays(16));
-		VacationRequestDto request3 = createVacationRequest(requestRaw3, employees[1].getId());
+		VacationRequestDto request3 = createVacationRequest(requestRaw3, employees[2].getId(), employees[2].getUserName());
 		VacationRequestDto requestRaw4 = new VacationRequestDto(now.plusDays(18), now.plusDays(19));
-		VacationRequestDto request4 = createVacationRequest(requestRaw4, employees[1].getId());
-		approveOrRefuseRequest(employees[2].getId(), "approve", request1.getId());
-		approveOrRefuseRequest(employees[2].getId(), "approve", request3.getId());
-		approveOrRefuseRequest(employees[2].getId(), "approve", request4.getId());
+		VacationRequestDto request4 = createVacationRequest(requestRaw4, employees[2].getId(), employees[2].getUserName());
+		approveOrRefuseRequest(employees[0].getId(), "approve", request1.getId(), employees[0].getUserName());
+		approveOrRefuseRequest(employees[0].getId(), "approve", request3.getId(), employees[0].getUserName());
+		approveOrRefuseRequest(employees[0].getId(), "approve", request4.getId(), employees[0].getUserName());
 		
 		List<VacationRequestDto> originalList = getAllVacationRequests();
 		
 		VacationRequestDto emptyVacationRequestDto = new VacationRequestDto();
 		emptyVacationRequestDto.setVacationRequestStatus(null);
 		
-		List<VacationRequestDto> listPage1 = getFoundLocationRequests(0, 20, null, null, null, null, null, emptyVacationRequestDto);
+		List<VacationRequestDto> listPage1 = getFoundLocationRequests(0, 20, null, null, null, emptyVacationRequestDto);
 		for (int i = 0; i < listPage1.size(); ++i) {
 			assertThat(listPage1.get(i))
 				.usingRecursiveComparison()
@@ -311,7 +345,7 @@ public class VacationRequestControllerIt {
 			assertThat(listPage1.get(i).getTsCreated()).isCloseTo(originalList.get(i).getTsCreated(), within(1, ChronoUnit.MICROS));
 		}
 		
-		List<VacationRequestDto> listPage2 = getFoundLocationRequests(0, 3, null, null, null, null, null, emptyVacationRequestDto);
+		List<VacationRequestDto> listPage2 = getFoundLocationRequests(0, 3, null, null, null, emptyVacationRequestDto);
 		for (int i = 0; i < listPage2.size(); ++i) {
 			assertThat(listPage2.get(i))
 				.usingRecursiveComparison()
@@ -321,7 +355,7 @@ public class VacationRequestControllerIt {
 		}
 		assertThat(listPage2.size()).isEqualTo(3);
 		
-		List<VacationRequestDto> listPage3 = getFoundLocationRequests(1, 3, null, null, null, null, null, emptyVacationRequestDto);
+		List<VacationRequestDto> listPage3 = getFoundLocationRequests(1, 3, null, null, null, emptyVacationRequestDto);
 		for (int i = 0; i < listPage3.size(); ++i) {
 			assertThat(listPage3.get(i))
 				.usingRecursiveComparison()
@@ -332,70 +366,84 @@ public class VacationRequestControllerIt {
 		assertThat(listPage3.size()).isEqualTo(1);
 		
 		List<VacationRequestDto> listSort1 = getFoundLocationRequests(null, null, "vacationRequestStatus",
-				null, null, null, null, emptyVacationRequestDto);
+				null, null, emptyVacationRequestDto);
 		assertThat(listSort1.get(0).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.CREATED);
 		assertThat(listSort1.get(1).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
 		assertThat(listSort1.get(2).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
 		assertThat(listSort1.get(3).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
 		
 		List<VacationRequestDto> listSort2 = getFoundLocationRequests(null, null, "vacationRequestStatus,desc",
-				null, null, null, null, emptyVacationRequestDto);
+				null, null, emptyVacationRequestDto);
 		assertThat(listSort2.get(0).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
 		assertThat(listSort2.get(1).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
 		assertThat(listSort2.get(2).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
 		assertThat(listSort2.get(3).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.CREATED);
 		
 		List<VacationRequestDto> listSort3 = getFoundLocationRequests(null, null, "vacationRequestStatus,desc&sort=requester.id",
-				null, null, null, null, emptyVacationRequestDto);
+				null, null, emptyVacationRequestDto);
 		assertThat(listSort3.get(0).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
-		assertThat(listSort3.get(0).getRequester()).isEqualTo(employees[0]);
+		assertThat(listSort3.get(0).getRequester()).isEqualTo(employees[1]);
 		assertThat(listSort3.get(1).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
-		assertThat(listSort3.get(1).getRequester()).isEqualTo(employees[1]);
+		assertThat(listSort3.get(1).getRequester()).isEqualTo(employees[2]);
 		assertThat(listSort3.get(2).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
-		assertThat(listSort3.get(2).getRequester()).isEqualTo(employees[1]);
+		assertThat(listSort3.get(2).getRequester()).isEqualTo(employees[2]);
 		assertThat(listSort3.get(3).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.CREATED);
-		assertThat(listSort3.get(3).getRequester()).isEqualTo(employees[0]);
+		assertThat(listSort3.get(3).getRequester()).isEqualTo(employees[1]);
 		
 		List<VacationRequestDto> listSort4 = getFoundLocationRequests(null, null, "vacationRequestStatus,desc&sort=requester.id,desc",
-				null, null, null, null, emptyVacationRequestDto);
+				null, null, emptyVacationRequestDto);
 		assertThat(listSort4.get(0).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
-		assertThat(listSort4.get(0).getRequester()).isEqualTo(employees[1]);
+		assertThat(listSort4.get(0).getRequester()).isEqualTo(employees[2]);
 		assertThat(listSort4.get(1).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
-		assertThat(listSort4.get(1).getRequester()).isEqualTo(employees[1]);
+		assertThat(listSort4.get(1).getRequester()).isEqualTo(employees[2]);
 		assertThat(listSort4.get(2).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.APPROVED);
-		assertThat(listSort4.get(2).getRequester()).isEqualTo(employees[0]);
+		assertThat(listSort4.get(2).getRequester()).isEqualTo(employees[1]);
 		assertThat(listSort4.get(3).getVacationRequestStatus()).isEqualTo(VacationRequestStatus.CREATED);
-		assertThat(listSort4.get(3).getRequester()).isEqualTo(employees[0]);
+		assertThat(listSort4.get(3).getRequester()).isEqualTo(employees[1]);
 		
+		VacationRequestDto vacationRequestWithRequestDateDto = new VacationRequestDto();
+		vacationRequestWithRequestDateDto.setVacationRequestStatus(null);
+		vacationRequestWithRequestDateDto.setStart(now.plusDays(6));
+		vacationRequestWithRequestDateDto.setEnd(now.plusDays(7));
 		List<VacationRequestDto> listRequestedInterval_6_7 = getFoundLocationRequests(null, null, null,
-				now.plusDays(6), now.plusDays(7), null, null, emptyVacationRequestDto);
+				null, null, vacationRequestWithRequestDateDto);
 		assertThat(listRequestedInterval_6_7).isEmpty();
 		
+		vacationRequestWithRequestDateDto.setStart(now.plusDays(6));
+		vacationRequestWithRequestDateDto.setEnd(now.plusDays(8));
 		List<VacationRequestDto> listRequestedInterval_6_8 = getFoundLocationRequests(null, null, null,
-				now.plusDays(6), now.plusDays(8), null, null, emptyVacationRequestDto);
+				null, null, vacationRequestWithRequestDateDto);
 		assertThat(listRequestedInterval_6_8.size()).isEqualTo(1);
 		assertThat(listRequestedInterval_6_8.get(0)).isEqualTo(originalList.get(0));
 		
+		vacationRequestWithRequestDateDto.setStart(now.plusDays(6));
+		vacationRequestWithRequestDateDto.setEnd(now.plusDays(9));
 		List<VacationRequestDto> listRequestedInterval_6_9 = getFoundLocationRequests(null, null, null,
-				now.plusDays(6), now.plusDays(9), null, null, emptyVacationRequestDto);
+				null, null, vacationRequestWithRequestDateDto);
 		assertThat(listRequestedInterval_6_9.size()).isEqualTo(1);
 		assertThat(listRequestedInterval_6_9.get(0)).isEqualTo(originalList.get(0));
 		
+		vacationRequestWithRequestDateDto.setStart(now.plusDays(6));
+		vacationRequestWithRequestDateDto.setEnd(now.plusDays(10));
 		List<VacationRequestDto> listRequestedInterval_6_10 = getFoundLocationRequests(null, null, null,
-				now.plusDays(6), now.plusDays(10), null, null, emptyVacationRequestDto);
+				null, null, vacationRequestWithRequestDateDto);
 		assertThat(listRequestedInterval_6_10.size()).isEqualTo(2);
 		assertThat(listRequestedInterval_6_10.get(0)).isEqualTo(originalList.get(0));
 		assertThat(listRequestedInterval_6_10.get(1)).isEqualTo(originalList.get(2));
 		
+		vacationRequestWithRequestDateDto.setStart(now.plusDays(11));
+		vacationRequestWithRequestDateDto.setEnd(now.plusDays(19));
 		List<VacationRequestDto> listRequestedInterval_11_19 = getFoundLocationRequests(null, null, null,
-				now.plusDays(11), now.plusDays(19), null, null, emptyVacationRequestDto);
+				null, null, vacationRequestWithRequestDateDto);
 		assertThat(listRequestedInterval_11_19.size()).isEqualTo(3);
 		assertThat(listRequestedInterval_11_19.get(0)).isEqualTo(originalList.get(0));
 		assertThat(listRequestedInterval_11_19.get(1)).isEqualTo(originalList.get(2));
 		assertThat(listRequestedInterval_11_19.get(2)).isEqualTo(originalList.get(3));
 		
+		vacationRequestWithRequestDateDto.setStart(now.plusDays(15));
+		vacationRequestWithRequestDateDto.setEnd(now.plusDays(20));
 		List<VacationRequestDto> listRequestedInterval_15_20 = getFoundLocationRequests(null, null, null,
-				now.plusDays(15), now.plusDays(20), null, null, emptyVacationRequestDto);
+				null, null, vacationRequestWithRequestDateDto);
 		assertThat(listRequestedInterval_15_20.size()).isEqualTo(3);
 		assertThat(listRequestedInterval_15_20.get(0)).isEqualTo(originalList.get(1));
 		assertThat(listRequestedInterval_15_20.get(1)).isEqualTo(originalList.get(2));
@@ -404,7 +452,7 @@ public class VacationRequestControllerIt {
 		VacationRequestDto approvedVacationRequestDto = new VacationRequestDto();
 		approvedVacationRequestDto.setVacationRequestStatus(VacationRequestStatus.APPROVED);
 		List<VacationRequestDto> listApprovedRequests = getFoundLocationRequests(null, null, null,
-				null, null, null, null, approvedVacationRequestDto);
+				null, null, approvedVacationRequestDto);
 		assertThat(listApprovedRequests.size()).isEqualTo(3);
 		assertThat(listApprovedRequests.get(0)).isEqualTo(originalList.get(0));
 		assertThat(listApprovedRequests.get(1)).isEqualTo(originalList.get(2));
@@ -413,7 +461,7 @@ public class VacationRequestControllerIt {
 		VacationRequestDto createdVacationRequestDto = new VacationRequestDto();
 		createdVacationRequestDto.setVacationRequestStatus(VacationRequestStatus.CREATED);
 		List<VacationRequestDto> listCreatedRequests = getFoundLocationRequests(null, null, null,
-				null, null, null, null, createdVacationRequestDto);
+				null, null, createdVacationRequestDto);
 		assertThat(listCreatedRequests.size()).isEqualTo(1);
 		assertThat(listCreatedRequests.get(0)).isEqualTo(originalList.get(1));
 		
@@ -422,18 +470,20 @@ public class VacationRequestControllerIt {
 		emp1VacationRequestDto.setRequester(employees[1]);
 		
 		List<VacationRequestDto> emp1Requests = getFoundLocationRequests(null, null, null,
-				null, null, null, null, emp1VacationRequestDto);
+				null, null, emp1VacationRequestDto);
 		assertThat(emp1Requests.size()).isEqualTo(2);
-		assertThat(emp1Requests.get(0)).isEqualTo(originalList.get(2));
-		assertThat(emp1Requests.get(1)).isEqualTo(originalList.get(3));
+		assertThat(emp1Requests.get(0)).isEqualTo(originalList.get(0));
+		assertThat(emp1Requests.get(1)).isEqualTo(originalList.get(1));
 		
 		VacationRequestDto emp1ApprovedVacationRequestDto = new VacationRequestDto();
 		emp1ApprovedVacationRequestDto.setVacationRequestStatus(VacationRequestStatus.APPROVED);
 		emp1ApprovedVacationRequestDto.setRequester(employees[1]);
+		emp1ApprovedVacationRequestDto.setStart(now.plusDays(12));
+		emp1ApprovedVacationRequestDto.setEnd(now.plusDays(16));
 		List<VacationRequestDto> emp1ApprovedRequestsMultiple_12_16 = getFoundLocationRequests(0, 2, null,
-				now.plusDays(12), now.plusDays(16), null, null, emp1ApprovedVacationRequestDto);
+				null, null, emp1ApprovedVacationRequestDto);
 		assertThat(emp1ApprovedRequestsMultiple_12_16.size()).isEqualTo(1);
-		assertThat(emp1ApprovedRequestsMultiple_12_16.get(0)).isEqualTo(originalList.get(2));
+		assertThat(emp1ApprovedRequestsMultiple_12_16.get(0)).isEqualTo(originalList.get(0));
 	}
 	
 	/**
@@ -448,13 +498,11 @@ public class VacationRequestControllerIt {
 	 * @param vacationRequestDto Vacation request example.
 	 * @return List of vacation requests.
 	 */
-	private List<VacationRequestDto> getFoundLocationRequests(Integer page, Integer size, String sort, LocalDate requestedFrom,
-			LocalDate requestedTo, LocalDateTime createdFrom, LocalDateTime createdTo, VacationRequestDto vacationRequestDto) {
+	private List<VacationRequestDto> getFoundLocationRequests(Integer page, Integer size, String sort, LocalDateTime createdFrom,
+			LocalDateTime createdTo, VacationRequestDto vacationRequestDto) {
 		
 		String findUri = String.format("%s/find", BASE_URI_VACATION_REQUEST);
-		if (page != null || size != null || sort != null || requestedFrom != null || requestedTo != null
-				|| createdFrom != null || createdTo != null) {
-			DateFormat dfDay = new SimpleDateFormat("yyyy-MM-dd");
+		if (page != null || size != null || sort != null || createdFrom != null || createdTo != null) {
 			DateFormat dfSec = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			findUri += '?';
 			boolean firstAdded = false;
@@ -475,22 +523,6 @@ public class VacationRequestControllerIt {
 					findUri += "&sort=" + sort;
 				} else {
 					findUri += "sort=" + sort;
-					firstAdded = true;
-				}
-			}
-			if (requestedFrom != null) {
-				if (firstAdded) {
-					findUri += "&requestedFrom=" + dfDay.format(Date.valueOf(requestedFrom).getTime());
-				} else {
-					findUri += "requestedFrom=" + dfDay.format(Date.valueOf(requestedFrom).getTime());
-					firstAdded = true;
-				}
-			}
-			if (requestedTo != null) {
-				if (firstAdded) {
-					findUri += "&requestedTo=" + dfDay.format(Date.valueOf(requestedTo).getTime());
-				} else {
-					findUri += "requestedTo=" + dfDay.format(Date.valueOf(requestedTo).getTime());
 					firstAdded = true;
 				}
 			}
@@ -515,6 +547,7 @@ public class VacationRequestControllerIt {
 		List<VacationRequestDto> responseList =  webTestClient
 				.post()
 				.uri(findUri)
+				.headers(header -> header.setBasicAuth(USER_REQUESTER_NAME, PASSWORD))
 				.bodyValue(vacationRequestDto)
 				.exchange()
 				.expectStatus()
@@ -523,5 +556,53 @@ public class VacationRequestControllerIt {
 				.returnResult()
 				.getResponseBody();
 		return responseList;
+	}
+	
+	@Test
+	void testUnauthorized() throws Exception {
+		LocalDate now = LocalDate.now();
+		VacationRequestDto request = new VacationRequestDto(now.plusDays(8), now.plusDays(12));
+		createUnauthorizedVacationRequest(request, employees[1].getId());
+	}
+	
+	/**
+	 * Creates a vacation request (unauthorized) (POST to base URI + ID of the requester).
+	 * @param requestDto    Request object.
+	 * @param requesterId   ID of the requester.
+	 */
+	private void createUnauthorizedVacationRequest(VacationRequestDto requestDto, long requesterId) {
+		webTestClient
+				.post()
+				.uri(String.format("%s/%d", BASE_URI_VACATION_REQUEST, requesterId))
+				.bodyValue(requestDto)
+				.exchange()
+				.expectStatus()
+				.isUnauthorized();
+	}
+	
+	@Test
+	void testIllegalApprove() throws Exception {
+		LocalDate now = LocalDate.now();
+
+		VacationRequestDto requestRaw = new VacationRequestDto(now.plusDays(8), now.plusDays(12));
+		VacationRequestDto request = createVacationRequest(requestRaw, employees[1].getId(), employees[1].getUserName());
+		approveRequestIllegal(employees[2].getId(), "approve", request.getId(), employees[2].getUserName());
+	}
+	
+	/**
+	 * Approves a request (not manager of employee) (GET to base URI + ID of the approver + action + ID of the request).
+	 * @param approverId   ID of the approver employee.
+	 * @param action       Action of the operation (approve / refuse).
+	 * @param requestId    ID of the request.
+	 * @param approverName User name of the approver.
+	 */
+	private void approveRequestIllegal(long approverId, String action, long requestId, String approverName) {
+		webTestClient
+				.get()
+				.uri(String.format("%s/%d/%s/%d", BASE_URI_VACATION_REQUEST, approverId, action, requestId))
+				.headers(header -> header.setBasicAuth(approverName, PASSWORD))
+				.exchange()
+				.expectStatus()
+				.is5xxServerError();
 	}
 }

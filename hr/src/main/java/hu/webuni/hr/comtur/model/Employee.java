@@ -36,10 +36,10 @@ public class Employee extends Id implements Comparable<Employee> {
 	private String password;
 	
 	@ManyToOne
-	@JoinColumn(name = "supervisor_id")
-	private Employee supervisor;
+	@JoinColumn(name = "manager_id")
+	private Employee manager;
 	
-	@OneToMany(mappedBy = "supervisor")
+	@OneToMany(mappedBy = "manager")
 	private List<Employee> subordinates;
 	
 	public Employee() {
@@ -72,7 +72,7 @@ public class Employee extends Id implements Comparable<Employee> {
 	}
 	
 	public Employee(String name, Position position, int salary, LocalDateTime startDate, Company company,
-			String userName, String password, Employee supervisor) {
+			String userName, String password, Employee manager) {
 		super();
 		this.name = name;
 		this.position = position;
@@ -81,7 +81,7 @@ public class Employee extends Id implements Comparable<Employee> {
 		this.company = company;
 		this.userName = userName;
 		this.password = password;
-		this.supervisor = supervisor;
+		this.manager = manager;
 	}
 
 	public String getName() {
@@ -140,12 +140,12 @@ public class Employee extends Id implements Comparable<Employee> {
 		this.password = password;
 	}
 
-	public Employee getSupervisor() {
-		return supervisor;
+	public Employee getManager() {
+		return manager;
 	}
 
-	public void setSupervisor(Employee supervisor) {
-		this.supervisor = supervisor;
+	public void setManager(Employee manager) {
+		this.manager = manager;
 	}
 
 	@Override
@@ -165,6 +165,6 @@ public class Employee extends Id implements Comparable<Employee> {
 	public String toString() {
 		return "Employee [name=" + name + ", position=" + position + ", salary=" + salary + ", startDate=" + startDate
 				+ ", company=" + company + ", userName=" + userName + ", password=" + password + ", supervisor="
-				+ supervisor + "]";
+				+ manager + "]";
 	}
 }

@@ -1,6 +1,5 @@
 package hu.webuni.hr.comtur.web;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,7 +28,6 @@ import hu.webuni.hr.comtur.dto.Views;
 import hu.webuni.hr.comtur.mapper.VacationRequestMapper;
 import hu.webuni.hr.comtur.model.VacationRequest;
 import hu.webuni.hr.comtur.model.VacationRequestStatus;
-import hu.webuni.hr.comtur.security.ExtendedUserPrincipal;
 import hu.webuni.hr.comtur.service.VacationRequestService;
 import hu.webuni.hr.comtur.service.exception.VacationRequestException;
 
@@ -52,7 +49,6 @@ public class HrRestVacationRequestController {
 	@PostMapping("/{requesterId}")
 	@JsonView(Views.VisibleData.class)
 	public VacationRequestDto create(@PathVariable long requesterId, @RequestBody @Valid VacationRequestDto vacationRequestDto) {
-		checkAuthorization(requesterId);
 		try {
 			VacationRequest vacationRequest = vacationRequestService.createVacationRequest(requesterId,
 					vacationRequestMapper.dtoToVacationRequest(vacationRequestDto));
@@ -62,19 +58,6 @@ public class HrRestVacationRequestController {
 		}
 	}
 
-	/**
-	 * Checks user's authorization and requester ID.
-	 * @param requesterId Requester ID path parameter.
-	 * @throws VacationRequestException In case of authorization failure.
-	 */
-	private void checkAuthorization(long requesterId) throws VacationRequestException {
-		ExtendedUserPrincipal principal = (ExtendedUserPrincipal)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		if (principal.getEmployee().getId() != requesterId) {
-			throw new VacationRequestException(String.format("Requester employee's ID (%d) is not the logged user's ID (%d)",
-					requesterId, principal.getEmployee().getId()));
-		}
-	}
-	
 	@GetMapping("/{approverId}/approve/{id}")
 	@JsonView(Views.VisibleData.class)
 	public VacationRequestDto approve(@PathVariable long approverId, @PathVariable long id) {
@@ -102,7 +85,6 @@ public class HrRestVacationRequestController {
 	public VacationRequestDto modify(@PathVariable long requesterId, @PathVariable long id,
 			@RequestBody @Valid VacationRequestDto vacationRequestDto) {
 		
-		checkAuthorization(requesterId);
 		try {
 			VacationRequest vacationRequest = vacationRequestService.modifyVacationRequest(requesterId, id,
 					vacationRequestMapper.dtoToVacationRequest(vacationRequestDto));
@@ -115,8 +97,6 @@ public class HrRestVacationRequestController {
 	@DeleteMapping("/{requesterId}/delete/{id}")
 	@JsonView(Views.VisibleData.class)
 	public void delete(@PathVariable long requesterId, @PathVariable long id) {
-		
-		checkAuthorization(requesterId);
 		try {
 			vacationRequestService.deleteVacationRequest(requesterId, id);
 		} catch (NoSuchElementException | IllegalStateException e) {
@@ -136,14 +116,11 @@ public class HrRestVacationRequestController {
 			@RequestBody VacationRequestDto vacationRequestDto,
 			@RequestParam(value = "createdFrom", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdFrom,
 			@RequestParam(value = "createdTo", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdTo,
-			@RequestParam(value = "requestedFrom", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate requestedFrom,
-			@RequestParam(value = "requestedTo", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate requestedTo,
 			@PageableDefault(sort = {"id"}) Pageable pageable) {
 		List<VacationRequest> vacationRequests = vacationRequestService.pageAllByExample(
 				vacationRequestMapper.dtoToVacationRequest(vacationRequestDto),
 				pageable,
-				new LocalDateTime[] {createdFrom, createdTo},
-				new LocalDate[] {requestedFrom, requestedTo}
+				new LocalDateTime[] {createdFrom, createdTo}
 		).getContent();
 		return vacationRequestMapper.vacationRequestsToDtos(vacationRequests);
 	}

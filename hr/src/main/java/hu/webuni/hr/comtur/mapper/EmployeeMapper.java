@@ -19,14 +19,12 @@ public interface EmployeeMapper {
 	@Mapping(target = "title", source = "position")
 	@Mapping(target = "company.employees", ignore = true)
 	@Mapping(target = "company.companyType", source = "company.companyType.name")
-	@Mapping(target = "supervisor", ignore = true)
 	@Mapping(target = "subordinates", ignore = true)
 	EmployeeDto employeeToDto(Employee employee);
 	
 	@Named("summary")
 	@Mapping(target = "title", source = "position")
 	@Mapping(target = "company", ignore = true)
-	@Mapping(target = "supervisor", ignore = true)
 	@Mapping(target = "subordinates", ignore = true)
 	EmployeeDto employeeToDtoWithNoCompany(Employee employee);
 

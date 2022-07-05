@@ -52,10 +52,10 @@ public class EmployeeDto implements IDtoKey, Comparable<EmployeeDto> {
 	
 	@JsonView(VisibleData.class)
 	@ManyToOne
-	@JoinColumn(name = "supervisor_id")
-	private EmployeeDto supervisor;
+	@JoinColumn(name = "manager_id")
+	private EmployeeDto manager;
 	
-	@OneToMany(mappedBy = "supervisor")
+	@OneToMany(mappedBy = "manager")
 	private List<EmployeeDto> subordinates;
 	
 	public EmployeeDto() {}
@@ -71,7 +71,7 @@ public class EmployeeDto implements IDtoKey, Comparable<EmployeeDto> {
 	}
 
 	public EmployeeDto(long id, @NotEmpty String name, PositionDto title, @Positive int salary,
-			@Past LocalDateTime startDate, CompanyDto company, String userName, String password, EmployeeDto supervisor) {
+			@Past LocalDateTime startDate, CompanyDto company, String userName, String password, EmployeeDto manager) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -81,7 +81,7 @@ public class EmployeeDto implements IDtoKey, Comparable<EmployeeDto> {
 		this.company = company;
 		this.userName = userName;
 		this.password = password;
-		this.supervisor = supervisor;
+		this.manager = manager;
 	}
 
 	public long getId() {
@@ -148,12 +148,12 @@ public class EmployeeDto implements IDtoKey, Comparable<EmployeeDto> {
 		this.password = password;
 	}
 
-	public EmployeeDto getSupervisor() {
-		return supervisor;
+	public EmployeeDto getManager() {
+		return manager;
 	}
 
-	public void setSupervisor(EmployeeDto supervisor) {
-		this.supervisor = supervisor;
+	public void setManager(EmployeeDto manager) {
+		this.manager = manager;
 	}
 
 	public List<EmployeeDto> getSubordinates() {
@@ -184,5 +184,11 @@ public class EmployeeDto implements IDtoKey, Comparable<EmployeeDto> {
 			return false;
 		EmployeeDto other = (EmployeeDto) obj;
 		return id == other.id;
+	}
+
+	@Override
+	public String toString() {
+		return "EmployeeDto [id=" + id + ", name=" + name + ", title=" + title + ", salary=" + salary + ", startDate="
+				+ startDate + ", userName=" + userName + ", password=" + password + ", manager=" + manager + "]";
 	}
 }
