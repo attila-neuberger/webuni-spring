@@ -44,6 +44,7 @@ public class VacationRequestService extends BaseService<VacationRequest> {
 	public VacationRequest changeVacationRequestStatus(long approverId, long id, VacationRequestStatus status)
 			throws NoSuchElementException, IllegalStateException {
 
+		checkAuthorization(approverId);
 		Optional<Employee> optionalApprover = employeeService.getEmployeeWithSubordinates(approverId);
 		if (!optionalApprover.isPresent()) {
 			throw new NoSuchElementException(String.format("Employee with ID '%d' does not exist (approver employee).", approverId));

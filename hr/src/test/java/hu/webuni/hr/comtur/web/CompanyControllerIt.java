@@ -19,6 +19,7 @@ import hu.webuni.hr.comtur.dto.CompanyDto;
 import hu.webuni.hr.comtur.dto.EmployeeDto;
 import hu.webuni.hr.comtur.dto.PositionDto;
 import hu.webuni.hr.comtur.model.Education;
+import hu.webuni.hr.comtur.security.StatelessCsrfFilter;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class CompanyControllerIt {
@@ -32,6 +33,8 @@ public class CompanyControllerIt {
 	}
 	
 	private final static String BASE_URI = "/api/companies";
+	
+	private static final String CSRF_TOKEN_VALUE = "xy";
 	
 	@Test
 	void testCreateEmployeeForCompany() throws Exception {
@@ -81,6 +84,8 @@ public class CompanyControllerIt {
 		webTestClient
 				.post()
 				.uri(String.format("%s/%d/add", BASE_URI, id))
+				.header(StatelessCsrfFilter.X_CSRF_TOKEN, CSRF_TOKEN_VALUE)
+				.cookie(StatelessCsrfFilter.CSRF_TOKEN, CSRF_TOKEN_VALUE)
 				.bodyValue(employeeDto)
 				.exchange()
 				.expectStatus()
@@ -128,6 +133,8 @@ public class CompanyControllerIt {
 		webTestClient
 				.delete()
 				.uri(String.format("%s/%d/delete/%d", BASE_URI, companyId, employeeId))
+				.header(StatelessCsrfFilter.X_CSRF_TOKEN, CSRF_TOKEN_VALUE)
+				.cookie(StatelessCsrfFilter.CSRF_TOKEN, CSRF_TOKEN_VALUE)
 				.exchange()
 				.expectStatus()
 				.isOk();
@@ -164,6 +171,8 @@ public class CompanyControllerIt {
 		webTestClient
 				.put()
 				.uri(String.format("%s/%d/swap", BASE_URI, id))
+				.header(StatelessCsrfFilter.X_CSRF_TOKEN, CSRF_TOKEN_VALUE)
+				.cookie(StatelessCsrfFilter.CSRF_TOKEN, CSRF_TOKEN_VALUE)
 				.bodyValue(employeeDtos)
 				.exchange()
 				.expectStatus()

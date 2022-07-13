@@ -116,10 +116,11 @@ public class InitDbService {
 			Employee employee3 = new Employee("John Abruzzi", new Position("Vezér", Education.COLLEGE), 550, LocalDateTime.of(2014, 1, 1, 0, 0), company3,
 					"u_abruzzi", passwordEncoder.encode("pass"), null);
 			add(employee3);
-			add(new Employee("Michael Scofield", positionS3, 500, LocalDateTime.of(2022, 1, 1, 0, 0), company3,
-					"u_scofield", passwordEncoder.encode("pass"), employee3));
+			Employee employee4 = new Employee("Michael Scofield", positionS3, 500, LocalDateTime.of(2022, 1, 1, 0, 0), company3,
+					"u_scofield", passwordEncoder.encode("pass"), employee3);
+			add(employee4);
 			add(new Employee("Lincoln Burrows", positionN3, 400, LocalDateTime.of(2018, 1, 1, 0, 0), company3,
-					"u_burrows", passwordEncoder.encode("pass"), employee3));
+					"u_burrows", passwordEncoder.encode("pass"), employee4)); // Burrows' manager is Scofield and not Abruzzi.
 			add(new Employee("Charles Westmoreland", positionS3, 300, LocalDateTime.of(2005, 1, 1, 0, 0), company3,
 					"u_westmoreland", passwordEncoder.encode("pass"), employee3));
 			add(new Employee("Theodore Bagwell", positionS3, 400, LocalDateTime.of(2016, 1, 1, 0, 0), company3,

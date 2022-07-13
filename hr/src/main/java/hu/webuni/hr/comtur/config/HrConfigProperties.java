@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class HrConfigProperties {
 	
+	/**
+	 * Employee salary configuration.
+	 */
 	private Employeesalary employeesalary;
 
 	public Employeesalary getEmployeesalary() {
@@ -65,6 +68,59 @@ public class HrConfigProperties {
 		}
 		public void setPercent(int[] percent) {
 			this.percent = percent;
+		}
+	}
+	
+	/**
+	 * JWT data configuration.
+	 */
+	private Jwtdata jwtdata;
+	
+	public Jwtdata getJwtdata() {
+		return jwtdata;
+	}
+
+	public void setJwtdata(Jwtdata jwtdata) {
+		this.jwtdata = jwtdata;
+	}
+
+	public static class Jwtdata {
+		
+		private String secret;
+		private String algorithm;
+		private long expiration;
+		private String issuer;
+		
+		public String getSecret() {
+			return secret;
+		}
+		
+		public void setSecret(String secret) {
+			this.secret = secret;
+		}
+		
+		public String getAlgorithm() {
+			return algorithm;
+		}
+		
+		public void setAlgorithm(String algorithm) {
+			this.algorithm = algorithm;
+		}
+		
+		public long getExpiration() {
+			return expiration;
+		}
+
+		public void setExpiration(long expiration) {
+			this.expiration = expiration;
+		}
+
+		public String getIssuer() {
+			return issuer;
+		}
+		
+		public void setIssuer(String issuer) {
+			this.issuer = issuer;
 		}
 	}
 }

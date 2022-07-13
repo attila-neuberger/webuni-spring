@@ -24,6 +24,8 @@
 		<org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
 		<org.springdoc.version>1.5.6</org.springdoc.version>
 		<org.hibernatemodelgen.version>5.4.30.Final</org.hibernatemodelgen.version>
+		<org.hibernatecore.version>5.6.9.Final</org.hibernatecore.version>
+		<com.oauth0.jwt.version>3.19.2</com.oauth0.jwt.version>
 	</properties>
 	
 	<dependencies>
@@ -93,7 +95,7 @@
 	    <dependency>
 	        <groupId>org.hibernate</groupId>
 	        <artifactId>hibernate-core</artifactId>
-	        <version>5.6.9.Final</version><!--$NO-MVN-MAN-VER$-->
+	        <version>${org.hibernatecore.version}</version><!--$NO-MVN-MAN-VER$-->
 	    </dependency>
 	    
 	    <dependency>
@@ -105,6 +107,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		
+		<dependency>
+    		<groupId>com.auth0</groupId>
+    		<artifactId>java-jwt</artifactId>
+    		<version>${com.oauth0.jwt.version}</version>
 		</dependency>
 	</dependencies>
 

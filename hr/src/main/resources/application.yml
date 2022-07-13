@@ -23,6 +23,11 @@ hr:
     smart:
       limit: [10, 5, 2.5]
       percent: [10, 5, 2]
+  jwtdata:
+    secret: mySecret
+    algorithm: HMAC256
+    expiration: 120
+    issuer: HrApplication
 
 server:
   error:

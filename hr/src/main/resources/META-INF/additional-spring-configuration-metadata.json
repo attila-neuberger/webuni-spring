@@ -13,5 +13,25 @@
     "name": "hr.employeesalary.smart.percent",
     "type": "int[]",
     "description": "Int array of salary raise percents (smart profile)"
+  },
+  {
+    "name": "hr.jwtdata.secret",
+    "type": "String",
+    "description": "Java web token signature secret"
+  },
+  {
+    "name": "hr.jwtdata.algorithm",
+    "type": "String",
+    "description": "Java web token coding algoritm type"
+  },
+  {
+    "name": "hr.jwtdata.expiration",
+    "type": "long",
+    "description": "Java web token expiration in seconds"
+  },
+  {
+    "name": "hr.jwtdata.issuer",
+    "type": "String",
+    "description": "Java web token issuer name"
   }
 ]}

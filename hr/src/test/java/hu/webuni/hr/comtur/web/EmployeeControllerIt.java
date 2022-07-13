@@ -15,6 +15,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import hu.webuni.hr.comtur.dto.EmployeeDto;
 import hu.webuni.hr.comtur.dto.PositionDto;
 import hu.webuni.hr.comtur.model.Education;
+import hu.webuni.hr.comtur.security.StatelessCsrfFilter;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class EmployeeControllerIt {
@@ -23,6 +24,8 @@ public class EmployeeControllerIt {
 	WebTestClient webTestClient;
 	
 	private final static String BASE_URI = "/api/employees";
+	
+	private static final String CSRF_TOKEN_VALUE = "xy";
 	
 	@Test
 	void testThatCreatedEmployeeIsListed() throws Exception {
@@ -68,6 +71,8 @@ public class EmployeeControllerIt {
 		webTestClient
 				.post()
 				.uri(BASE_URI)
+				.header(StatelessCsrfFilter.X_CSRF_TOKEN, CSRF_TOKEN_VALUE)
+				.cookie(StatelessCsrfFilter.CSRF_TOKEN, CSRF_TOKEN_VALUE)
 				.bodyValue(employeeDto)
 				.exchange()
 				.expectStatus()
@@ -103,6 +108,8 @@ public class EmployeeControllerIt {
 		webTestClient
 				.post()
 				.uri(BASE_URI)
+				.header(StatelessCsrfFilter.X_CSRF_TOKEN, CSRF_TOKEN_VALUE)
+				.cookie(StatelessCsrfFilter.CSRF_TOKEN, CSRF_TOKEN_VALUE)
 				.bodyValue(employeeDto)
 				.exchange()
 				.expectStatus()
@@ -149,6 +156,8 @@ public class EmployeeControllerIt {
 		webTestClient
 				.put()
 				.uri(String.format("%s/%d", BASE_URI, employeeDto.getId()))
+				.header(StatelessCsrfFilter.X_CSRF_TOKEN, CSRF_TOKEN_VALUE)
+				.cookie(StatelessCsrfFilter.CSRF_TOKEN, CSRF_TOKEN_VALUE)
 				.bodyValue(employeeDto)
 				.exchange()
 				.expectStatus()
@@ -167,7 +176,7 @@ public class EmployeeControllerIt {
 			employeeDto.setName("");
 			modifyInvalidEmployee(employeeDto);
 			employeeDto.setName(employeeDtoSavedState.getName());
-			// employeeDto.setTitle(new PositionDto("", Education.NONE, 50)); // TODO Position validity test.
+			// employeeDto.setTitle(new PositionDto("", Education.NONE, 50));
 			// modifyInvalidEmployee(employeeDto);
 			// employeeDto.setTitle(employeeDtoSavedState.getTitle());
 			employeeDto.setSalary(-1);
@@ -191,6 +200,8 @@ public class EmployeeControllerIt {
 		webTestClient
 				.put()
 				.uri(String.format("%s/%d", BASE_URI, employeeDto.getId()))
+				.header(StatelessCsrfFilter.X_CSRF_TOKEN, CSRF_TOKEN_VALUE)
+				.cookie(StatelessCsrfFilter.CSRF_TOKEN, CSRF_TOKEN_VALUE)
 				.bodyValue(employeeDto)
 				.exchange()
 				.expectStatus()
