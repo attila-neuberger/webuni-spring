@@ -1,0 +1,33 @@
+spring:
+  mvc:
+    format:
+      date-time: yyyy-MM-dd HH:mm:ss
+  datasource:
+    url: jdbc:postgresql://localhost:5432/WebuniSpringLogistics
+    username: postgres
+    password: supernova
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+
+logistics:
+  transportplan:
+    delayminutes: [30, 60, 120]
+    delaypenalty: [2.5, 7.5, 20]
+  jwtdata:
+    secret: mySecret
+    algorithm: HMAC256
+    expiration: 600
+    issuer: LogisticsApplication
+
+server:
+  error:
+    include-message: always
+
+logging:
+  level:
+    org:
+      springframework:
+        security: debug

@@ -1,0 +1,32 @@
+{"properties": [
+  {
+    "name": "logistics.transportplan.delayminutes",
+    "type": "int[]",
+    "description": "Integer array of transport plan delay minutes."
+  },
+  {
+    "name": "logistics.transportplan.delaypenalty",
+    "type": "double[]",
+    "description": "Double array of transport plan delay penalties (percent)."
+  },
+  {
+    "name": "logistics.jwtdata.secret",
+    "type": "String",
+    "description": "Java web token signature secret"
+  },
+  {
+    "name": "logistics.jwtdata.algorithm",
+    "type": "String",
+    "description": "Java web token coding algoritm type"
+  },
+  {
+    "name": "logistics.jwtdata.expiration",
+    "type": "long",
+    "description": "Java web token expiration in seconds"
+  },
+  {
+    "name": "logistics.jwtdata.issuer",
+    "type": "String",
+    "description": "Java web token issuer name"
+  }
+]}
